@@ -4,8 +4,8 @@
 class Shovel : public StationaryEntity
 {
 public:
-    Shovel(int id) : StationaryEntity(id) {}
+    Shovel(int id_, int loadSpeed) : StationaryEntity(id_), loadSpeed(loadSpeed) {}
     
 private:
-    int loadSpeed;
+    int loadSpeed = 0;
 };

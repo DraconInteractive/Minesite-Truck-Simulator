@@ -4,5 +4,5 @@
 class Dump : public StationaryEntity
 {
 public:
-    
+    Dump(int id_) : StationaryEntity(id_){}
 };

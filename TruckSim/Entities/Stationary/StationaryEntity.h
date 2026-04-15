@@ -4,5 +4,5 @@
 class StationaryEntity : public Entity
 {
 public:
-    StationaryEntity(int id) : Entity(id){}
+    StationaryEntity(int id_) : Entity(id_){}
 };
