@@ -12,11 +12,25 @@ protected:
     
 // Methods
 public:
-    int GetId();
-    Position GetPosition();
+    int GetId() const
+    {
+        return id;
+    }
     
-    void SetPosition(int x, int y);
-    void SetPosition(Position newPosition);
+    Position GetPosition() const
+    {
+        return position;
+    }
+    
+    void SetPosition(int x, int y)
+    {
+        position = Position{x,y};
+    }
+    
+    void SetPosition(Position newPosition)
+    {
+        position = newPosition;
+    }
     
     Entity(int id) : id(id) {}
     virtual ~Entity() = default;

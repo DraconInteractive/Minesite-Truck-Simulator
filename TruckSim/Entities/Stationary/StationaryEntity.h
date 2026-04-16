@@ -4,5 +4,8 @@
 class StationaryEntity : public Entity
 {
 public:
-    StationaryEntity(int id_) : Entity(id_){}
+    StationaryEntity(int id_, Position _position) : Entity(id_)
+    {
+        SetPosition(_position);
+    }
 };

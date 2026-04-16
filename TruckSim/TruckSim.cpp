@@ -35,6 +35,17 @@ enum class EventType : uint8_t
     TruckFinishDumping
 };
 
+std::string EventTypeToString(EventType type)
+{
+    switch (type)
+    {
+        case EventType::TruckArriveShovel:      return "TruckArriveShovel";
+        case EventType::TruckFinishLoading:     return "TruckFinishLoading";
+        case EventType::TruckArriveDump:        return "TruckArriveDump";
+        case EventType::TruckFinishDumping:     return "TruckFinishDumping";
+    }
+}
+
 struct Event
 {
     double time;
@@ -89,13 +100,13 @@ int main(int argc, char* argv[])
     }
 
     shovels.reserve(1);
-    shovels = { Shovel(0, 10) };
+    shovels = { Shovel(0, Position{5, 10}, 10) };
 
     dumps.reserve(1);
-    dumps = { Dump(0)};
+    dumps = { Dump(0, Position{-3, 6}, 5)};
 
     evtQueue.push(Event{0, TruckId{0}, ShovelId{0}, {}, EventType::TruckArriveShovel});
-    evtQueue.push(Event{0, TruckId{1}, ShovelId{0}, {}, EventType::TruckArriveShovel});
+    evtQueue.push(Event{1, TruckId{1}, ShovelId{0}, {}, EventType::TruckArriveShovel});
     
     while (!evtQueue.empty())
     {
@@ -104,12 +115,17 @@ int main(int argc, char* argv[])
 
         currentTime = evt.time;
 
+        std::cout << "Processing event [" << EventTypeToString(evt.type) << "] at time: " << currentTime << "\n";
+        
         switch (evt.type)
         {
             case EventType::TruckArriveShovel:
             {
                 Shovel& arriveShovel = shovels[evt.shovel.value];
-                if (arriveShovel.TrucksInQueue() == 0) // Only queue event if first in line, trucks in line will trigger when first leaves queue
+
+                arriveShovel.EnqueueTruck(evt.truck);
+
+                if (arriveShovel.TrucksInQueue() == 1) // Only queue event if first in line, trucks in line will trigger when first leaves queue
                 {
                     trucks[evt.truck.value].SetState(TruckState::Loading);
                     evtQueue.push(Event{currentTime + arriveShovel.TimeToLoad(), evt.truck, evt.shovel, {}, EventType::TruckFinishLoading});
@@ -118,7 +134,6 @@ int main(int argc, char* argv[])
                 {
                     trucks[evt.truck.value].SetState(TruckState::Queueing);
                 }
-                arriveShovel.EnqueueTruck(evt.truck);
                 break;
             }
             case EventType::TruckFinishLoading:
@@ -126,7 +141,7 @@ int main(int argc, char* argv[])
                 Shovel& leaveShovel = shovels[evt.shovel.value];
                 Truck& truckLeavingShovel = trucks[evt.truck.value];
 
-                leaveShovel.DequeueTruck(evt.truck); // Truck has finished loading, and is leaving, so remove from queue
+                leaveShovel.DequeueTruck(); // Truck has finished loading, and is leaving, so remove from queue
             
                 truckLeavingShovel.SetState(TruckState::Travelling);
                 const double travelTimeToDump = travelTime(leaveShovel.GetPosition(), dumps[0].GetPosition(), trucks[evt.truck.value].GetSpeed());
@@ -145,7 +160,9 @@ int main(int argc, char* argv[])
             case EventType::TruckArriveDump:
             {
                 Dump& arriveDump = dumps[evt.dump.value];
-                if (arriveDump.TrucksInQueue() == 0)
+                arriveDump.EnqueueTruck(evt.truck);
+
+                if (arriveDump.TrucksInQueue() == 1)
                 {
                     trucks[evt.truck.value].SetState(TruckState::Dumping);
                     evtQueue.push(Event{currentTime + arriveDump.TimeToDump(), evt.truck, {}, evt.dump, EventType::TruckFinishDumping});
@@ -154,13 +171,12 @@ int main(int argc, char* argv[])
                 {
                     trucks[evt.truck.value].SetState(TruckState::Queueing);
                 }
-                arriveDump.EnqueueTruck(evt.truck);
                 break;
             }
             case EventType::TruckFinishDumping:
             {
                 Dump& leaveDump = dumps[evt.dump.value];
-                leaveDump.DequeueTruck(evt.truck);
+                leaveDump.DequeueTruck();
 
                 // here we could navigate back to the shovel, but to avoid a constant loop we're going to say the truck is resting after a single trip
 
