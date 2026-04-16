@@ -107,8 +107,10 @@ int main(int argc, char* argv[])
 
     evtQueue.push(Event{0, TruckId{0}, ShovelId{0}, {}, EventType::TruckArriveShovel});
     evtQueue.push(Event{1, TruckId{1}, ShovelId{0}, {}, EventType::TruckArriveShovel});
+
+    double timeCap = 1000;
     
-    while (!evtQueue.empty())
+    while (!evtQueue.empty() && currentTime < timeCap)
     {
         Event evt = evtQueue.top();
         evtQueue.pop();
@@ -144,7 +146,7 @@ int main(int argc, char* argv[])
                 leaveShovel.DequeueTruck(); // Truck has finished loading, and is leaving, so remove from queue
             
                 truckLeavingShovel.SetState(TruckState::Travelling);
-                const double travelTimeToDump = travelTime(leaveShovel.GetPosition(), dumps[0].GetPosition(), trucks[evt.truck.value].GetSpeed());
+                const double travelTimeToDump = travelTime(leaveShovel.GetPosition(), dumps[0].GetPosition(), truckLeavingShovel.GetSpeed());
                 evtQueue.push(Event{currentTime + travelTimeToDump, evt.truck, {}, DumpId{0}, EventType::TruckArriveDump});
             
                 if (leaveShovel.TrucksInQueue() > 0)
@@ -176,10 +178,16 @@ int main(int argc, char* argv[])
             case EventType::TruckFinishDumping:
             {
                 Dump& leaveDump = dumps[evt.dump.value];
+                Truck& truckLeavingDump = trucks[evt.truck.value];
+                    
                 leaveDump.DequeueTruck();
 
                 // here we could navigate back to the shovel, but to avoid a constant loop we're going to say the truck is resting after a single trip
 
+                truckLeavingDump.SetState(TruckState::Travelling);
+                const double travelTimeToShovel = travelTime(leaveDump.GetPosition(), shovels[0].GetPosition(), truckLeavingDump.GetSpeed());
+                evtQueue.push(Event{currentTime + travelTimeToShovel, evt.truck, ShovelId{0}, {}, EventType::TruckArriveShovel});
+                    
                 // Start processing next truck in queue
                 if (leaveDump.TrucksInQueue() > 0)
                 {
