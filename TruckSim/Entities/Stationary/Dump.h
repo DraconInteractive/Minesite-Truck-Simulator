@@ -3,11 +3,21 @@
 #include "StationaryEntity.h"
 #include "../Mobile/Truck.h"
 
+struct DumpId
+{
+    int value = -1;
+};
+
 class Dump : public StationaryEntity
 {
 public:
     Dump(int id_, Position _position, double dumpSpeed) : StationaryEntity(id_, _position), dumpSpeed(dumpSpeed){}
 
+    DumpId GetDumpId() const
+    {
+        return DumpId{GetId()};
+    }
+    
     int TrucksInQueue() const
     {
         return static_cast<int>(waitingQueue.size());
@@ -34,6 +44,8 @@ public:
     {
         return waitingQueue.front();
     }
+
+    static DumpId GetBestDump(Truck& truck, std::vector<Dump>& dumps, float distPriority = 1, float queuePriority = 1);
 
 private:
     double dumpSpeed = 0;

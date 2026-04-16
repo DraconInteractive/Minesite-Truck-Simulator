@@ -4,11 +4,21 @@
 #include "StationaryEntity.h"
 #include "../Mobile/Truck.h"
 
+struct ShovelId
+{
+    int value = -1;
+};
+
 class Shovel : public StationaryEntity
 {
 public:
     Shovel(int id_, Position _position, double loadSpeed) : StationaryEntity(id_, _position), loadSpeed(loadSpeed) {}
 
+    ShovelId GetShovelId() const
+    {
+        return ShovelId{GetId()};
+    }
+    
     int TrucksInQueue() const
     {
         return static_cast<int>(waitingQueue.size());
@@ -35,6 +45,8 @@ public:
     {
         return waitingQueue.front();
     }
+
+    static ShovelId GetBestShovel(Truck& truck, std::vector<Shovel>& shovels, float distPriority = 1, float queuePriority = 1);
     
 private:
     double loadSpeed = 0;

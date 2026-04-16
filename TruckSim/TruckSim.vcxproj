@@ -384,6 +384,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\console.h" />
+    <ClInclude Include="Core\Event.h" />
+    <ClInclude Include="Core\Utilities.h" />
     <ClInclude Include="Entities\Mobile\MobileEntity.h" />
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Mobile\Truck.h" />
