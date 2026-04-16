@@ -1,4 +1,6 @@
+#include <cmath>
 #include <iostream>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -14,11 +16,6 @@ struct AppState
 
 // Create structs for entity id classification - stops me from assigning shovel ID to truck ID function
 constexpr int INVALID_ENTITY_ID = -1;
-
-struct TruckId
-{
-    int value = INVALID_ENTITY_ID;
-};
 
 struct ShovelId
 {
@@ -47,8 +44,28 @@ struct Event
     EventType type;
 };
 
+double travelTime(Position a, Position b, float speed)
+{
+    int dx = b.x - a.x;
+    int dy = b.y - a.y;
+    double distance = std::sqrt(dx * dx + dy * dy);
+    return distance / speed;
+}
+
+struct CompareByTime {                                       
+    bool operator()(const Event& a, const Event& b) {        
+        return a.time > b.time;  // > makes it a min-heap  
+    }                                                        
+};
+
 int main(int argc, char* argv[])
 {
+    // TODO make MineState object
+    // Tracks variables at a global scale
+    // This will include items such as priorities for different materials etc
+    // Then, feed this into event calls so that entities can factor that into decision making
+    // This could be what material to load, or it could facilitate what shovel to target (to ensure lowest queue time)
+    
     AppState state;
     state.running = true;
     
@@ -59,6 +76,9 @@ int main(int argc, char* argv[])
     std::vector<Shovel> shovels;
     std::vector<Dump> dumps;
 
+    std::priority_queue<Event, std::vector<Event>, CompareByTime> evtQueue; // smallest event time at top
+    double currentTime = 0;
+    
     // TODO move the above structs to their own area, and guide this init from a config file
 
     trucks.reserve(3);
@@ -73,7 +93,88 @@ int main(int argc, char* argv[])
 
     dumps.reserve(1);
     dumps = { Dump(0)};
+
+    evtQueue.push(Event{0, TruckId{0}, ShovelId{0}, {}, EventType::TruckArriveShovel});
+    evtQueue.push(Event{0, TruckId{1}, ShovelId{0}, {}, EventType::TruckArriveShovel});
     
+    while (!evtQueue.empty())
+    {
+        Event evt = evtQueue.top();
+        evtQueue.pop();
+
+        currentTime = evt.time;
+
+        switch (evt.type)
+        {
+            case EventType::TruckArriveShovel:
+            {
+                Shovel& arriveShovel = shovels[evt.shovel.value];
+                if (arriveShovel.TrucksInQueue() == 0) // Only queue event if first in line, trucks in line will trigger when first leaves queue
+                {
+                    trucks[evt.truck.value].SetState(TruckState::Loading);
+                    evtQueue.push(Event{currentTime + arriveShovel.TimeToLoad(), evt.truck, evt.shovel, {}, EventType::TruckFinishLoading});
+                }
+                else
+                {
+                    trucks[evt.truck.value].SetState(TruckState::Queueing);
+                }
+                arriveShovel.EnqueueTruck(evt.truck);
+                break;
+            }
+            case EventType::TruckFinishLoading:
+            {
+                Shovel& leaveShovel = shovels[evt.shovel.value];
+                Truck& truckLeavingShovel = trucks[evt.truck.value];
+
+                leaveShovel.DequeueTruck(evt.truck); // Truck has finished loading, and is leaving, so remove from queue
+            
+                truckLeavingShovel.SetState(TruckState::Travelling);
+                const double travelTimeToDump = travelTime(leaveShovel.GetPosition(), dumps[0].GetPosition(), trucks[evt.truck.value].GetSpeed());
+                evtQueue.push(Event{currentTime + travelTimeToDump, evt.truck, {}, DumpId{0}, EventType::TruckArriveDump});
+            
+                if (leaveShovel.TrucksInQueue() > 0)
+                {
+                    // Start loading next truck
+                    TruckId nextTruck = leaveShovel.GetFirst();
+                    trucks[nextTruck.value].SetState(TruckState::Loading);
+                    evtQueue.push(Event{currentTime + leaveShovel.TimeToLoad(), nextTruck, evt.shovel, {}, EventType::TruckFinishLoading});
+                }
+            
+                break;
+            }
+            case EventType::TruckArriveDump:
+            {
+                Dump& arriveDump = dumps[evt.dump.value];
+                if (arriveDump.TrucksInQueue() == 0)
+                {
+                    trucks[evt.truck.value].SetState(TruckState::Dumping);
+                    evtQueue.push(Event{currentTime + arriveDump.TimeToDump(), evt.truck, {}, evt.dump, EventType::TruckFinishDumping});
+                }
+                else
+                {
+                    trucks[evt.truck.value].SetState(TruckState::Queueing);
+                }
+                arriveDump.EnqueueTruck(evt.truck);
+                break;
+            }
+            case EventType::TruckFinishDumping:
+            {
+                Dump& leaveDump = dumps[evt.dump.value];
+                leaveDump.DequeueTruck(evt.truck);
+
+                // here we could navigate back to the shovel, but to avoid a constant loop we're going to say the truck is resting after a single trip
+
+                // Start processing next truck in queue
+                if (leaveDump.TrucksInQueue() > 0)
+                {
+                    TruckId nextTruck = leaveDump.GetFirst();
+                    trucks[nextTruck.value].SetState(TruckState::Dumping);
+                    evtQueue.push(Event{currentTime + leaveDump.TimeToDump(), nextTruck, {}, evt.dump, EventType::TruckFinishDumping});
+                }
+                break;
+            }
+        }
+    }
     while (state.running)
     {
         std::string inputLine;

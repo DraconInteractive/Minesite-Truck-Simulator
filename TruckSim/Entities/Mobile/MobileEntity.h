@@ -5,6 +5,7 @@ class MobileEntity : public Entity
 {
 public:
     MobileEntity(int id_, int speed) : Entity(id_) {} // TODO make a sort of construction DTO so we can create an entity from a config
+    float GetSpeed();
     
 private:
     float speed = 0;
