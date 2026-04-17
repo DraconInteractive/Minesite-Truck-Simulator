@@ -7,6 +7,9 @@
 #include "Core/console.h"
 #include "Core/Utilities.h"
 
+#include <raylib.h>
+#include "Rendering/Renderer.h"
+
 #include "Entities/Mobile/Truck.h"
 #include "Entities/Stationary/Dump.h"
 #include "Entities/Stationary/Shovel.h"
@@ -24,11 +27,14 @@ struct CompareByTime {
 
 int main(int argc, char* argv[])
 {
+    std::cout << "Start\n";
     AppState state;
     state.running = true;
     
     console::enableAnsi();
     // console::enableRawInput(); // For later - better navigation etc
+
+    std::cout << "ANSI enabled\n";
 
     std::vector<Truck> trucks;
     std::vector<Shovel> shovels;
@@ -53,16 +59,24 @@ int main(int argc, char* argv[])
     dumps.reserve(3);
     dumps = {
         Dump(0, Position{-3, 6}, 5),
-        Dump(0, Position{-10, 0}, 5),
-        Dump(0, Position{-5, 3}, 5)
+        Dump(1, Position{5, -3}, 5),
+        Dump(2, Position{-5, 3}, 5)
     };
 
     evtQueue.push(Event{0, TruckId{0}, ShovelId{0}, {}, EventType::TruckArriveShovel});
     evtQueue.push(Event{1, TruckId{1}, ShovelId{0}, {}, EventType::TruckArriveShovel});
     evtQueue.push(Event{5, TruckId{2}, ShovelId{0}, {}, EventType::TruckArriveShovel});
 
+    std::cout << "Queue Setup\n";
+
     double timeCap = 1000;
-    
+
+    // Init rendering
+    InitWindow(800,600, "TruckSim");
+    Font font = LoadFontEx("C:/Windows/Fonts/arial.ttf", 20, 0, 0);
+
+    std::cout << "Rendering setup\n";
+
     while (!evtQueue.empty() && currentTime < timeCap)
     {
         Event evt = evtQueue.top();
@@ -158,12 +172,18 @@ int main(int argc, char* argv[])
                 break;
             }
         }
+        
+        if (!WindowShouldClose())
+        {
+            Render(shovels, dumps, trucks, evt, currentTime, font);
+            WaitForKeypress();
+        }
+        else
+        {
+            break;
+        }
     }
-    while (state.running)
-    {
-        std::string inputLine;
-        std::getline(std::cin, inputLine);
-        std::cout << "Echo: " + inputLine;
-    }
+    
+    CloseWindow();
     return 0;
 }
