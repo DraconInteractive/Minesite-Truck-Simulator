@@ -31,13 +31,13 @@ public:
     void EnqueueTruck(TruckId truck)
     {
         std::cout << "Adding truck " << truck.value << " to queue at dump " << id << "\n";
-        waitingQueue.push(truck);
+        waitingQueue.push_back(truck);
     }
     
     void DequeueTruck()
     {
         std::cout << "Remove truck from queue at dump " << id << "\n";
-        waitingQueue.pop();
+        waitingQueue.pop_front();
     }
     
     TruckId GetFirst() const
@@ -45,9 +45,14 @@ public:
         return waitingQueue.front();
     }
 
+    std::deque<TruckId> GetQueue() const
+    {
+        return waitingQueue;
+    }
+    
     static DumpId GetBestDump(Truck& truck, std::vector<Dump>& dumps, float distPriority = 1, float queuePriority = 1);
 
 private:
     double dumpSpeed = 0;
-    std::queue<TruckId> waitingQueue;
+    std::deque<TruckId> waitingQueue;
 };

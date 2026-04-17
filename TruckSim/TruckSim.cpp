@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
     std::priority_queue<Event, std::vector<Event>, CompareByTime> evtQueue; // smallest event time at top
     double currentTime = 0;
     
-    trucks.reserve(3);
-    for (int i = 0; i < 3; i++)
+    trucks.reserve(5);
+    for (int i = 0; i < 5; i++)
     {
         // Use emplace to construct in-place instead of construct->copy
         trucks.emplace_back(i, 60, 100, 0);
@@ -58,14 +58,17 @@ int main(int argc, char* argv[])
     
     dumps.reserve(3);
     dumps = {
-        Dump(0, Position{-3, 6}, 5),
-        Dump(1, Position{5, -3}, 5),
-        Dump(2, Position{-5, 3}, 5)
+        Dump(0, Position{-3, 6}, 10),
+        Dump(1, Position{5, -3}, 10),
+        Dump(2, Position{-5, 3}, 10)
     };
 
-    evtQueue.push(Event{0, TruckId{0}, ShovelId{0}, {}, EventType::TruckArriveShovel});
-    evtQueue.push(Event{1, TruckId{1}, ShovelId{0}, {}, EventType::TruckArriveShovel});
-    evtQueue.push(Event{5, TruckId{2}, ShovelId{0}, {}, EventType::TruckArriveShovel});
+    // Seed events. Manually set truck targets for first phase. Stagger entry for fun
+    evtQueue.push(Event{2, TruckId{0}, ShovelId{0}, {}, EventType::TruckArriveShovel});
+    evtQueue.push(Event{3, TruckId{1}, ShovelId{0}, {}, EventType::TruckArriveShovel});
+    evtQueue.push(Event{4, TruckId{2}, ShovelId{0}, {}, EventType::TruckArriveShovel});
+    evtQueue.push(Event{5, TruckId{3}, ShovelId{1}, {}, EventType::TruckArriveShovel});
+    evtQueue.push(Event{5, TruckId{4}, ShovelId{1}, {}, EventType::TruckArriveShovel});
 
     std::cout << "Queue Setup\n";
 
@@ -117,6 +120,7 @@ int main(int argc, char* argv[])
                 truckLeavingShovel.SetState(TruckState::Travelling);
                 DumpId bestDump = Dump::GetBestDump(truckLeavingShovel, dumps);
                 const double travelTimeToDump = Utilities::GetTravelTime(shovel.GetPosition(), dumps[bestDump.value].GetPosition(), truckLeavingShovel.GetSpeed());
+                truckLeavingShovel.targetPosition = dumps[bestDump.value].GetPosition();
                 evtQueue.push(Event{currentTime + travelTimeToDump, evt.truck, {}, bestDump, EventType::TruckArriveDump});
             
                 if (shovel.TrucksInQueue() > 0)
@@ -160,6 +164,8 @@ int main(int argc, char* argv[])
                 truckLeavingDump.SetState(TruckState::Travelling);
                 ShovelId bestShovel = Shovel::GetBestShovel(truckLeavingDump, shovels);
                 const double travelTimeToShovel = Utilities::GetTravelTime(dump.GetPosition(), shovels[bestShovel.value].GetPosition(), truckLeavingDump.GetSpeed());
+                truckLeavingDump.targetPosition = shovels[bestShovel.value].GetPosition();
+                    
                 evtQueue.push(Event{currentTime + travelTimeToShovel, evt.truck, bestShovel, {}, EventType::TruckArriveShovel});
                     
                 // Start processing next truck in queue

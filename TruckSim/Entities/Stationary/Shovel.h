@@ -32,13 +32,13 @@ public:
     void EnqueueTruck(TruckId truck)
     {
         std::cout << "Adding truck " << truck.value << " to queue at shovel " << id << "\n";
-        waitingQueue.push(truck);
+        waitingQueue.push_back(truck);
     }
     
     void DequeueTruck()
     {
         std::cout << "Removing truck from queue at shovel " << id << "\n";
-        waitingQueue.pop();
+        waitingQueue.pop_front();
     }
     
     TruckId GetFirst() const
@@ -46,9 +46,14 @@ public:
         return waitingQueue.front();
     }
 
+    std::deque<TruckId> GetQueue() const
+    {
+        return waitingQueue;
+    }
+    
     static ShovelId GetBestShovel(Truck& truck, std::vector<Shovel>& shovels, float distPriority = 1, float queuePriority = 1);
     
 private:
     double loadSpeed = 0;
-    std::queue<TruckId> waitingQueue;
+    std::deque<TruckId> waitingQueue;
 };

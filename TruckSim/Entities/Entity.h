@@ -22,7 +22,7 @@ public:
         return position;
     }
     
-    void SetPosition(int x, int y)
+    void SetPosition(float x, float y)
     {
         position = Position{x,y};
     }

@@ -45,6 +45,10 @@ public:
         state = newState;
         std::cout << "Truck " << id << " is now " + TruckStateToString(state) << "\n";
     }
+
+    // Just for rendering right now, so we can plot where from/to trucks are going
+    // Public, it doesnt matter what touches this in the current state
+    Position targetPosition;
     
 private:
     int capacity = 0;
