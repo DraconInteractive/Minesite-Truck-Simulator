@@ -32,7 +32,6 @@ inline void RenderTruck(const Truck& t, Vector2 v, float labelX, float labelY, F
     
     DrawCircleV(v, 8, c);
 
-    //DrawText(("T" + std::to_string(t.GetId())).c_str(),(int)tp.x + 10, (int)tp.y - 8, 16, WHITE);
     DrawTextEx(labelFont, ("T" + std::to_string(t.GetId())).c_str(), {labelX, labelY}, 16, 1, WHITE);
 }
 
@@ -56,7 +55,6 @@ inline void Render(
     {
         Vector2 sp = worldToScreen(s.GetPosition());
         DrawCircleV(sp, 12, YELLOW);
-        //DrawText(("S" + std::to_string(s.GetId())).c_str(),(int)sp.x + 14, (int)sp.y - 8, 16, WHITE);
         DrawTextEx(font, ("S" + std::to_string(s.GetId())).c_str(), {sp.x + 16, sp.y - 8}, 18, 1, WHITE);
 
         int truckCount = 0;
@@ -74,7 +72,6 @@ inline void Render(
     {
         Vector2 dp = worldToScreen(d.GetPosition());
         DrawRectangle((int)dp.x - 12, (int)dp.y - 12, 24, 24, RED);
-        //DrawText(("D" + std::to_string(d.GetId())).c_str(),(int)dp.x + 14, (int)dp.y - 8, 16, WHITE);
         DrawTextEx(font, ("D" + std::to_string(d.GetId())).c_str(), {dp.x + 14, dp.y - 8}, 18, 1, WHITE);
 
         int truckCount = 0;

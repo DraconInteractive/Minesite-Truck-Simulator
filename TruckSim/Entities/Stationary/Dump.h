@@ -23,9 +23,9 @@ public:
         return static_cast<int>(waitingQueue.size());
     }
     
-    double TimeToDump() const
+    double TimeToDump(const Truck& truck) const
     {
-        return dumpSpeed; // TODO change this to take in a truck parameter, and use truck current load / speed
+        return truck.CurrentLoad() / dumpSpeed;
     }
     
     void EnqueueTruck(TruckId truck)
@@ -53,6 +53,7 @@ public:
     static DumpId GetBestDump(Truck& truck, std::vector<Dump>& dumps, float distPriority = 1, float queuePriority = 1);
 
 private:
+    // Time per unit, for now say tonnes per minute
     double dumpSpeed = 0;
     std::deque<TruckId> waitingQueue;
 };

@@ -24,9 +24,9 @@ public:
         return static_cast<int>(waitingQueue.size());
     }
     
-    double TimeToLoad() const
+    double TimeToLoad(const Truck& truck) const
     {
-        return loadSpeed; // TODO change this to take in a truck parameter, and use truck current load / speed
+        return truck.RemainingCapacity() / loadSpeed;
     }
     
     void EnqueueTruck(TruckId truck)
@@ -54,6 +54,7 @@ public:
     static ShovelId GetBestShovel(Truck& truck, std::vector<Shovel>& shovels, float distPriority = 1, float queuePriority = 1);
     
 private:
+    // Time per unit (define actual metric later. For now, say tonnes per minute?)
     double loadSpeed = 0;
     std::deque<TruckId> waitingQueue;
 };

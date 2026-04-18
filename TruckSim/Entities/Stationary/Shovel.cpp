@@ -14,7 +14,7 @@ ShovelId Shovel::GetBestShovel(Truck& truck, std::vector<Shovel>& shovels, float
     for (Shovel& shovel : shovels)
     {
         const double dist = Utilities::GetTravelTime(truckPos, shovel.GetPosition(), truckSpeed) * distPriority;
-        const double queueWait = shovel.TrucksInQueue() * shovel.TimeToLoad() * queuePriority;
+        const double queueWait = shovel.TrucksInQueue() * shovel.TimeToLoad(truck) * queuePriority;
         const double score = dist + queueWait;
         if (score < bestScore)
         {

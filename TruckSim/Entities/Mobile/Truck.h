@@ -49,7 +49,56 @@ public:
     // Just for rendering right now, so we can plot where from/to trucks are going
     // Public, it doesnt matter what touches this in the current state
     Position targetPosition;
+
+    int RemainingCapacity() const
+    {
+        return capacity - currentLoad;
+    }
+
+    int CurrentLoad() const
+    {
+        return currentLoad;
+    }
     
+    int Fill()
+    {
+        currentLoad = capacity;
+        return 0;
+    }
+    
+    // Returns what doesnt fit
+    int Fill(int amount)
+    {
+        currentLoad += amount;
+        if (currentLoad > capacity)
+        {
+            int over = capacity - currentLoad;
+            currentLoad = capacity;
+            return over;
+        }
+        return 0;
+    }
+
+    int Empty()
+    {
+        currentLoad = 0;
+        return 0;
+    }
+    
+    // Returns what it couldnt empty (because there was none left)
+    int Empty(int amount)
+    {
+        currentLoad -= amount;
+        
+        if (currentLoad < 0)
+        {
+            int under = std::abs(currentLoad);
+            currentLoad = 0;
+            return under;
+        }
+
+        return 0;
+    }
 private:
     int capacity = 0;
     int currentLoad = 0;

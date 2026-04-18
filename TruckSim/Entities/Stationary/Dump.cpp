@@ -13,7 +13,7 @@ DumpId Dump::GetBestDump(Truck& truck, std::vector<Dump>& dumps, float distPrior
     for (Dump& dump : dumps)
     {
         const double dist = Utilities::GetTravelTime(truckPos, dump.GetPosition(), truckSpeed) * distPriority;
-        const double queueWait = dump.TrucksInQueue() * dump.TimeToDump() * queuePriority;
+        const double queueWait = dump.TrucksInQueue() * dump.TimeToDump(truck) * queuePriority;
         const double score = dist + queueWait;
         if (score < bestScore)
         {
