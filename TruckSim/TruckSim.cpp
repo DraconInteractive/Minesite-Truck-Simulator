@@ -106,8 +106,10 @@ int main(int argc, char* argv[])
 
                 if (shovel.TrucksInQueue() == 1) // Only queue event if first in line, trucks in line will trigger when first leaves queue
                 {
+                    float duration = shovel.TimeToLoad(trucks[evt.truck.value]) ;
+                    truck.StartTask(currentTime, duration);
                     trucks[evt.truck.value].SetState(TruckState::Loading);
-                    evtQueue.push(Event{currentTime + shovel.TimeToLoad(trucks[evt.truck.value]), evt.truck, evt.shovel, {}, EventType::TruckFinishLoading});
+                    evtQueue.push(Event{currentTime + duration, evt.truck, evt.shovel, {}, EventType::TruckFinishLoading});
                 }
                 else
                 {
@@ -129,16 +131,19 @@ int main(int argc, char* argv[])
                 DumpId bestDump = Dump::GetBestDump(truckLeavingShovel, dumps);
                 const double travelTimeToDump = Utilities::GetTravelTime(shovel.GetPosition(), dumps[bestDump.value].GetPosition(), truckLeavingShovel.GetSpeed());
                 truckLeavingShovel.targetPosition = dumps[bestDump.value].GetPosition();
+                truckLeavingShovel.StartTask(currentTime, travelTimeToDump);
                 evtQueue.push(Event{currentTime + travelTimeToDump, evt.truck, {}, bestDump, EventType::TruckArriveDump});
 
                 // Process next truck in queue
                 if (shovel.TrucksInQueue() > 0)
                 {
-                    TruckId nextTruck = shovel.GetFirst();
-                    trucks[nextTruck.value].SetState(TruckState::Loading);
-                    evtQueue.push(Event{currentTime + shovel.TimeToLoad(trucks[nextTruck.value]), nextTruck, evt.shovel, {}, EventType::TruckFinishLoading});
+                    const TruckId nextTruckId = shovel.GetFirst();
+                    Truck& nextTruck = trucks[nextTruckId.value];
+                    nextTruck.SetState(TruckState::Loading);
+                    double loadDuration = shovel.TimeToLoad(nextTruck);
+                    nextTruck.StartTask(currentTime, loadDuration);
+                    evtQueue.push(Event{currentTime + loadDuration, nextTruckId, evt.shovel, {}, EventType::TruckFinishLoading});
                 }
-            
                 break;
             }
             case EventType::TruckArriveDump:
@@ -151,12 +156,14 @@ int main(int argc, char* argv[])
 
                 if (dump.TrucksInQueue() == 1)
                 {
-                    trucks[evt.truck.value].SetState(TruckState::Dumping);
-                    evtQueue.push(Event{currentTime + dump.TimeToDump(trucks[evt.truck.value]), evt.truck, {}, evt.dump, EventType::TruckFinishDumping});
+                    truck.SetState(TruckState::Dumping);
+                    float duration = dump.TimeToDump(truck);
+                    truck.StartTask(currentTime, duration);
+                    evtQueue.push(Event{currentTime + duration, evt.truck, {}, evt.dump, EventType::TruckFinishDumping});
                 }
                 else
                 {
-                    trucks[evt.truck.value].SetState(TruckState::Queueing);
+                    truck.SetState(TruckState::Queueing);
                 }
                 break;
             }
@@ -173,15 +180,18 @@ int main(int argc, char* argv[])
                 ShovelId bestShovel = Shovel::GetBestShovel(truckLeavingDump, shovels);
                 const double travelTimeToShovel = Utilities::GetTravelTime(dump.GetPosition(), shovels[bestShovel.value].GetPosition(), truckLeavingDump.GetSpeed());
                 truckLeavingDump.targetPosition = shovels[bestShovel.value].GetPosition();
-                    
+                truckLeavingDump.StartTask(currentTime, travelTimeToShovel);
                 evtQueue.push(Event{currentTime + travelTimeToShovel, evt.truck, bestShovel, {}, EventType::TruckArriveShovel});
                     
                 // Start processing next truck in queue
                 if (dump.TrucksInQueue() > 0)
                 {
-                    TruckId nextTruck = dump.GetFirst();
-                    trucks[nextTruck.value].SetState(TruckState::Dumping);
-                    evtQueue.push(Event{currentTime + dump.TimeToDump(trucks[nextTruck.value]), nextTruck, {}, evt.dump, EventType::TruckFinishDumping});
+                    TruckId nextTruckId = dump.GetFirst();
+                    Truck& nextTruck = trucks[nextTruckId.value];
+                    nextTruck.SetState(TruckState::Dumping);
+                    float dumpDuration = dump.TimeToDump(nextTruck);
+                    nextTruck.StartTask(currentTime, dumpDuration);
+                    evtQueue.push(Event{currentTime + dumpDuration, nextTruckId, {}, evt.dump, EventType::TruckFinishDumping});
                 }
                 break;
             }
