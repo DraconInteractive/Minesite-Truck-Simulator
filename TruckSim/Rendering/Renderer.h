@@ -88,7 +88,9 @@ inline void Render(const SimState& sim, Event evt, Font font)
         Vector2 start = worldToScreen(t.GetPosition());
         Vector2 end = worldToScreen(t.targetPosition);
 
-        Position mid = (t.GetPosition() + t.targetPosition) * 0.5f;
+        float perc = t.EstTaskCompletionPercentage(sim.currentTime);
+        Position truckPos = t.GetPosition();
+        Position mid = truckPos + (t.targetPosition - truckPos) * perc;
         Vector2 tp = worldToScreen(mid);
         
         RenderTruck(t, tp, tp.x, tp.y - 30, font);
