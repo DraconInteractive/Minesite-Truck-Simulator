@@ -104,8 +104,9 @@ void DispatchTruckToDump(SimState& sim, TruckId truckId)
     truck.SetState(TruckState::Travelling);
     
     const DumpId bestDump = Dump::GetBestDump(truck, sim.dumps);
-    const float travelTimeToDump = Utilities::GetTravelTime(truck.GetPosition(), sim.dumps[bestDump.value].GetPosition(), truck.GetSpeed());
-    truck.targetPosition = sim.dumps[bestDump.value].GetPosition();
+    const Position dumpPos = sim.dumps[bestDump.value].GetPosition();
+    const float travelTimeToDump = Utilities::GetTravelTime(truck.GetPosition(), dumpPos, truck.GetSpeed());
+    truck.targetPosition = dumpPos;
 
     auto arriveAtDumpEvt = Event{sim.currentTime + travelTimeToDump, truckId, {}, bestDump, EventType::TruckArriveDump};
     truck.StartTask(sim.currentTime, arriveAtDumpEvt);

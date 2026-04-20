@@ -3,19 +3,19 @@
 
 #include "../../Core/Utilities.h"
 
-ShovelId Shovel::GetBestShovel(Truck& truck, std::vector<Shovel>& shovels, float distPriority, float queuePriority)
+ShovelId Shovel::GetBestShovel(Truck& truck, std::vector<Shovel>& shovels, float travelTimePriority, float queuePriority)
 {
     ShovelId bestShovel;
-    double bestScore = std::numeric_limits<double>::max();
+    float bestScore = std::numeric_limits<float>::max();
 
-    Position truckPos = truck.GetPosition();
-    float truckSpeed = truck.GetSpeed();
+    const Position truckPos = truck.GetPosition();
+    const float truckSpeed = truck.GetSpeed();
     
     for (Shovel& shovel : shovels)
     {
-        const double dist = Utilities::GetTravelTime(truckPos, shovel.GetPosition(), truckSpeed) * distPriority;
-        const double queueWait = shovel.TrucksInQueue() * shovel.TimeToLoad(truck) * queuePriority;
-        const double score = dist + queueWait;
+        const float travelTime = Utilities::GetTravelTime(truckPos, shovel.GetPosition(), truckSpeed) * travelTimePriority;
+        const float queueWait = static_cast<float>(shovel.TrucksInQueue()) * shovel.TimeToLoad(truck) * queuePriority;
+        const float score = travelTime + queueWait;
         if (score < bestScore)
         {
             bestScore = score;

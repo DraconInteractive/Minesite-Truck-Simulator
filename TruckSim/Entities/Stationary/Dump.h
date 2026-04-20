@@ -43,12 +43,12 @@ public:
         return waitingQueue.front();
     }
 
-    std::deque<TruckId> GetQueue() const
+    const std::deque<TruckId>& GetQueue() const
     {
         return waitingQueue;
     }
     
-    static DumpId GetBestDump(Truck& truck, std::vector<Dump>& dumps, float distPriority = 1, float queuePriority = 1);
+    static DumpId GetBestDump(Truck& truck, std::vector<Dump>& dumps, float travelTimePriority = 1, float queuePriority = 1);
 
 private:
     // Time per unit, for now say tonnes per minute

@@ -44,12 +44,12 @@ public:
         return waitingQueue.front();
     }
 
-    std::deque<TruckId> GetQueue() const
+    const std::deque<TruckId>& GetQueue() const
     {
         return waitingQueue;
     }
     
-    static ShovelId GetBestShovel(Truck& truck, std::vector<Shovel>& shovels, float distPriority = 1, float queuePriority = 1);
+    static ShovelId GetBestShovel(Truck& truck, std::vector<Shovel>& shovels, float travelTimePriority = 1, float queuePriority = 1);
     
 private:
     // Time per unit (define actual metric later. For now, say tonnes per minute?)
