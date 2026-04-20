@@ -386,7 +386,9 @@
   <ItemGroup>
     <ClInclude Include="Core\console.h" />
     <ClInclude Include="Core\Event.h" />
+    <ClInclude Include="Core\Simulation.h" />
     <ClInclude Include="Core\Utilities.h" />
+    <ClInclude Include="Entities\EntityIdTypes.h" />
     <ClInclude Include="Entities\Mobile\MobileEntity.h" />
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\Mobile\Truck.h" />
@@ -395,6 +397,7 @@
     <ClInclude Include="Entities\Stationary\StationaryEntity.h" />
     <ClInclude Include="Rendering\Renderer.h" />
     <ClInclude Include="Types\Position.h" />
+    <ClInclude Include="Types\SimState.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
