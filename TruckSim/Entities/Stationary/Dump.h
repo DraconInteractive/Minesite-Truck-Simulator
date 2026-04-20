@@ -3,10 +3,8 @@
 #include "StationaryEntity.h"
 #include "../Mobile/Truck.h"
 
-struct DumpId
-{
-    int value = -1;
-};
+#include "../EntityIdTypes.h"
+
 
 class Dump : public StationaryEntity
 {

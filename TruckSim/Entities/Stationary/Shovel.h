@@ -4,10 +4,8 @@
 #include "StationaryEntity.h"
 #include "../Mobile/Truck.h"
 
-struct ShovelId
-{
-    int value = -1;
-};
+#include "../EntityIdTypes.h"
+
 
 class Shovel : public StationaryEntity
 {

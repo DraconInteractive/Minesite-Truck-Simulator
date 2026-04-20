@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "MobileEntity.h"
+#include "../../Core/Event.h";
 
 enum class TruckState
 {
@@ -24,21 +25,15 @@ inline std::string TruckStateToString(TruckState state)
     }
 }
 
-
-struct TruckId
-{
-    int value = -1; // Default to invalid ID
-};
-
 class Truck : public MobileEntity
 {
 public:
     Truck(int id_, float speed, int capacity, int currentLoad) : MobileEntity(id_, speed), capacity(capacity), currentLoad(currentLoad) {} // TODO make a sort of construction DTO so we can create an entity from a config
 
-    void StartTask(float startTime, float duration)
+    void StartTask(float startTime, Event scheduledEvent)
     {
         timeTaskStarted = startTime;
-        taskDuration = duration;
+        nextEvent = scheduledEvent;
     }
     
     TruckState GetState() const
@@ -108,25 +103,22 @@ public:
 
     float EstTaskTimeRemaining(float currentTime) const
     {
-        if (currentTime > timeTaskStarted + taskDuration)
-        {
-            return 0;
-        }
-        
-        return timeTaskStarted + taskDuration - currentTime;
+        return nextEvent.time - currentTime;
     }
 
     float EstTaskCompletionPercentage(float currentTime) const
     {
-        if (taskDuration <= 0) return 1.0f;
-        float t = (currentTime - timeTaskStarted) / taskDuration;
-        return t < 0.0f ? 0.0f : t > 1.0f ? 1.0f : t;
+        const float total = nextEvent.time - timeTaskStarted;
+        if (total <= 0) return 1.0f;
+        const float t = (currentTime - timeTaskStarted) / total;
+        return t < 0.f ? 0.f : t > 1.f ? 1.f : t;
+
     }
     
 private:
     int capacity = 0;
     int currentLoad = 0;
     float timeTaskStarted = 0;
-    float taskDuration = 0;
+    Event nextEvent;
     TruckState state = TruckState::Idle;
 };

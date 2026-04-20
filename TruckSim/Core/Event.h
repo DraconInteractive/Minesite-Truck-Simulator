@@ -1,7 +1,6 @@
 ﻿#pragma once
-#include "../Entities/Mobile/Truck.h"
-#include "../Entities/Stationary/Dump.h"
-#include "../Entities/Stationary/Shovel.h"
+#include "../Entities/EntityIdTypes.h"
+
 
 enum class EventType : uint8_t
 {

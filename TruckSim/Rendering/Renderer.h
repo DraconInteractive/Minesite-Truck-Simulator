@@ -2,6 +2,7 @@
 
 #include "raylib.h"
 #include "../Types/Position.h"
+#include "../Types/SimState.h"
 #include "../Entities/Mobile/Truck.h"
 #include "../Entities/Stationary/Shovel.h"
 #include "../Entities/Stationary/Dump.h"
@@ -35,14 +36,8 @@ inline void RenderTruck(const Truck& t, Vector2 v, float labelX, float labelY, F
     DrawTextEx(labelFont, ("T" + std::to_string(t.GetId())).c_str(), {labelX, labelY}, 16, 1, WHITE);
 }
 
-inline void Render(         
-      const std::vector<Shovel>& shovels,                         
-      const std::vector<Dump>& dumps,                             
-      const std::vector<Truck>& trucks,
-      Event evt,
-      double simTime,
-      Font font)                                             
-{                                                     
+inline void Render(const SimState& sim, Event evt, Font font)
+{
     BeginDrawing();
     ClearBackground(BLACK);
 
@@ -51,7 +46,7 @@ inline void Render(
     DrawLine(400, 0, 400, 600, DARKGRAY);
 
     // Shovels
-    for (const auto& s : shovels)
+    for (const auto& s : sim.shovels)
     {
         Vector2 sp = worldToScreen(s.GetPosition());
         DrawCircleV(sp, 12, YELLOW);
@@ -60,15 +55,15 @@ inline void Render(
         int truckCount = 0;
         for (const TruckId t : s.GetQueue())
         {
-            if (trucks[t.value].GetState() == TruckState::Travelling) continue;
-            Vector2 tp = worldToScreen(trucks[t.value].GetPosition());
-            RenderTruck(trucks[t.value], tp, tp.x + (22 * truckCount), tp.y - 30, font);
+            if (sim.trucks[t.value].GetState() == TruckState::Travelling) continue;
+            Vector2 tp = worldToScreen(sim.trucks[t.value].GetPosition());
+            RenderTruck(sim.trucks[t.value], tp, tp.x + (22 * truckCount), tp.y - 30, font);
             truckCount++;
         }
     }
 
     // Dumps
-    for (const auto& d : dumps)
+    for (const auto& d : sim.dumps)
     {
         Vector2 dp = worldToScreen(d.GetPosition());
         DrawRectangle((int)dp.x - 12, (int)dp.y - 12, 24, 24, RED);
@@ -77,16 +72,16 @@ inline void Render(
         int truckCount = 0;
         for (const TruckId t : d.GetQueue())
         {
-            if (trucks[t.value].GetState() == TruckState::Travelling) continue;
-            Vector2 tp = worldToScreen(trucks[t.value].GetPosition());
-            RenderTruck(trucks[t.value], tp, tp.x + (22 * truckCount), tp.y - 30, font);
+            if (sim.trucks[t.value].GetState() == TruckState::Travelling) continue;
+            Vector2 tp = worldToScreen(sim.trucks[t.value].GetPosition());
+            RenderTruck(sim.trucks[t.value], tp, tp.x + (22 * truckCount), tp.y - 30, font);
             truckCount++;
         }
     }
 
     // Trucks - mainly rendered by sites, but this is for the ones that are between sites
     
-    for (const auto& t : trucks)
+    for (const auto& t : sim.trucks)
     {
         if (t.GetState() != TruckState::Travelling) continue;
         
@@ -105,14 +100,16 @@ inline void Render(
     
     
     // Sim time
-    DrawText(("t=" + std::to_string((int)simTime)).c_str(), 10,
+    DrawText(("t=" + std::to_string(static_cast<int>(sim.currentTime))).c_str(), 10,
 10, 20, WHITE);
 
-    DrawText(("T" + std::to_string(trucks[evt.truck.value].GetId()) + ": " + EventTypeToString(evt.type)).c_str(), 10, 35, 20, WHITE);
+    DrawText(("T" + std::to_string(sim.trucks[evt.truck.value].GetId()) + ": " + EventTypeToString(evt.type)).c_str(), 10, 35, 20, WHITE);
     
     // Key prompt
     DrawText("Press any key...", 10, 578, 16, DARKGRAY);
 
     EndDrawing();
 }
+
+
 
