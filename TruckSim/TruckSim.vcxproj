@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Config.cpp" />
     <ClCompile Include="Core\console.cpp" />
     <ClCompile Include="Core\Simulation.cpp" />
     <ClCompile Include="Entities\Mobile\MobileEntity.cpp">
@@ -385,6 +386,7 @@
     <ClCompile Include="TruckSim.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Config.h" />
     <ClInclude Include="Core\console.h" />
     <ClInclude Include="Core\Event.h" />
     <ClInclude Include="Core\Simulation.h" />
@@ -397,8 +399,15 @@
     <ClInclude Include="Entities\Stationary\Shovel.h" />
     <ClInclude Include="Entities\Stationary\StationaryEntity.h" />
     <ClInclude Include="Rendering\Renderer.h" />
+    <ClInclude Include="Types\DebugConfig.h" />
     <ClInclude Include="Types\Position.h" />
+    <ClInclude Include="Types\RoutingConfig.h" />
     <ClInclude Include="Types\SimState.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="sim.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

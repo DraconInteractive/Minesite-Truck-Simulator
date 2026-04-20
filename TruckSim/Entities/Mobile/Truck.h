@@ -23,7 +23,7 @@ inline std::string TruckStateToString(TruckState state)
         case TruckState::Queueing:   return "Queueing";
         case TruckState::Dumping:    return "Dumping";
     }
-    return "Unknown"
+    return "Unknown";
 }
 
 class Truck : public MobileEntity

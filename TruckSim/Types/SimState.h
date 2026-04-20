@@ -3,6 +3,7 @@
 #include "../Entities/Mobile/Truck.h"
 #include "../Entities/Stationary/Shovel.h"
 #include "../Entities/Stationary/Dump.h"
+#include "RoutingConfig.h"
 
 struct CompareByTime {                                       
     bool operator()(const Event& a, const Event& b) {        
@@ -17,4 +18,5 @@ struct SimState
     std::vector<Dump>   dumps;
     std::priority_queue<Event, std::vector<Event>, CompareByTime> evtQueue;
     float currentTime = 0;
+    RoutingConfig routing;
 };

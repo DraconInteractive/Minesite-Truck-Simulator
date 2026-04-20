@@ -97,7 +97,7 @@ void Simulation::HandleTruckFinishDumping (SimState& sim, const Event& evt)
 
 // Helpers
 
-void DispatchTruckToDump(SimState& sim, TruckId truckId)
+void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
 {
     Truck& truck = sim.trucks[truckId.value];
     
@@ -114,7 +114,7 @@ void DispatchTruckToDump(SimState& sim, TruckId truckId)
     sim.evtQueue.push(arriveAtDumpEvt);
 }
 
-void DispatchTruckToShovel(SimState& sim, TruckId truckId)
+void Simulation::DispatchTruckToShovel(SimState& sim, TruckId truckId)
 {
     Truck& truck = sim.trucks[truckId.value];
     
