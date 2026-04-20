@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core\console.cpp" />
+    <ClCompile Include="Core\Simulation.cpp" />
     <ClCompile Include="Entities\Mobile\MobileEntity.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
