@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     
     std::cout << "Queue Setup\n";
 
-    double timeCap = 1000;
+    float timeCap = 1000;
 
     // Init rendering
     InitWindow(800,600, "TruckSim");
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
                 if (shovel.TrucksInQueue() == 1) // Only queue event if first in line, trucks in line will trigger when first leaves queue
                 {
                     float duration = shovel.TimeToLoad(sim.trucks[evt.truck.value]) ;
-                    Event finishLoadingEvt = Event{sim.currentTime + duration, evt.truck, evt.shovel, {}, EventType::TruckFinishLoading};
+                    auto finishLoadingEvt = Event{sim.currentTime + duration, evt.truck, evt.shovel, {}, EventType::TruckFinishLoading};
                     truck.StartTask(sim.currentTime, finishLoadingEvt);
                     sim.trucks[evt.truck.value].SetState(TruckState::Loading);
                     sim.evtQueue.push(finishLoadingEvt);
@@ -127,9 +127,9 @@ int main(int argc, char* argv[])
                 // Move truck to dump
                 truckLeavingShovel.SetState(TruckState::Travelling);
                 DumpId bestDump = Dump::GetBestDump(truckLeavingShovel, sim.dumps);
-                const double travelTimeToDump = Utilities::GetTravelTime(shovel.GetPosition(), sim.dumps[bestDump.value].GetPosition(), truckLeavingShovel.GetSpeed());
+                const float travelTimeToDump = Utilities::GetTravelTime(shovel.GetPosition(), sim.dumps[bestDump.value].GetPosition(), truckLeavingShovel.GetSpeed());
                 truckLeavingShovel.targetPosition = sim.dumps[bestDump.value].GetPosition();
-                Event arriveAtDumpEvt = Event{sim.currentTime + travelTimeToDump, evt.truck, {}, bestDump, EventType::TruckArriveDump};
+                auto arriveAtDumpEvt = Event{sim.currentTime + travelTimeToDump, evt.truck, {}, bestDump, EventType::TruckArriveDump};
                 truckLeavingShovel.StartTask(sim.currentTime, arriveAtDumpEvt);
                 sim.evtQueue.push(arriveAtDumpEvt);
 
@@ -139,8 +139,8 @@ int main(int argc, char* argv[])
                     const TruckId nextTruckId = shovel.GetFirst();
                     Truck& nextTruck = sim.trucks[nextTruckId.value];
                     nextTruck.SetState(TruckState::Loading);
-                    double loadDuration = shovel.TimeToLoad(nextTruck);
-                    Event finishLoadingEvt = Event{sim.currentTime + loadDuration, nextTruckId, evt.shovel, {}, EventType::TruckFinishLoading};
+                    float loadDuration = shovel.TimeToLoad(nextTruck);
+                    auto finishLoadingEvt = Event{sim.currentTime + loadDuration, nextTruckId, evt.shovel, {}, EventType::TruckFinishLoading};
                     nextTruck.StartTask(sim.currentTime, finishLoadingEvt);
                     sim.evtQueue.push(finishLoadingEvt);
                 }
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
                 {
                     truck.SetState(TruckState::Dumping);
                     float duration = dump.TimeToDump(truck);
-                    Event finishDumpingEvt = Event{sim.currentTime + duration, evt.truck, {}, evt.dump, EventType::TruckFinishDumping};
+                    auto finishDumpingEvt = Event{sim.currentTime + duration, evt.truck, {}, evt.dump, EventType::TruckFinishDumping};
                     truck.StartTask(sim.currentTime, finishDumpingEvt);
                     sim.evtQueue.push(finishDumpingEvt);
                 }
@@ -179,9 +179,9 @@ int main(int argc, char* argv[])
                     
                 truckLeavingDump.SetState(TruckState::Travelling);
                 ShovelId bestShovel = Shovel::GetBestShovel(truckLeavingDump, sim.shovels);
-                const double travelTimeToShovel = Utilities::GetTravelTime(dump.GetPosition(), sim.shovels[bestShovel.value].GetPosition(), truckLeavingDump.GetSpeed());
+                const float travelTimeToShovel = Utilities::GetTravelTime(dump.GetPosition(), sim.shovels[bestShovel.value].GetPosition(), truckLeavingDump.GetSpeed());
                 truckLeavingDump.targetPosition = sim.shovels[bestShovel.value].GetPosition();
-                Event arriveAtShovelEvt = Event{sim.currentTime + travelTimeToShovel, evt.truck, bestShovel, {}, EventType::TruckArriveShovel};
+                auto arriveAtShovelEvt = Event{sim.currentTime + travelTimeToShovel, evt.truck, bestShovel, {}, EventType::TruckArriveShovel};
                 truckLeavingDump.StartTask(sim.currentTime, arriveAtShovelEvt);
                 sim.evtQueue.push(arriveAtShovelEvt);
                     

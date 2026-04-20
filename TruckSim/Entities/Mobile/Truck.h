@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "MobileEntity.h"
-#include "../../Core/Event.h";
+#include "../../Core/Event.h"
 
 enum class TruckState
 {
@@ -23,6 +23,7 @@ inline std::string TruckStateToString(TruckState state)
         case TruckState::Queueing:   return "Queueing";
         case TruckState::Dumping:    return "Dumping";
     }
+    return "Unknown"
 }
 
 class Truck : public MobileEntity
@@ -49,7 +50,7 @@ public:
 
     // Just for rendering right now, so we can plot where from/to trucks are going
     // Public, it doesnt matter what touches this in the current state
-    Position targetPosition;
+    Position targetPosition = {0,0};
 
     int RemainingCapacity() const
     {
@@ -119,6 +120,6 @@ private:
     int capacity = 0;
     int currentLoad = 0;
     float timeTaskStarted = 0;
-    Event nextEvent;
+    Event nextEvent = {};
     TruckState state = TruckState::Idle;
 };

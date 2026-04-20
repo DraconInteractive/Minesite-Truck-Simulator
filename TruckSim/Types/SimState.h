@@ -16,5 +16,5 @@ struct SimState
     std::vector<Shovel> shovels;
     std::vector<Dump>   dumps;
     std::priority_queue<Event, std::vector<Event>, CompareByTime> evtQueue;
-    double currentTime = 0;
+    float currentTime = 0;
 };

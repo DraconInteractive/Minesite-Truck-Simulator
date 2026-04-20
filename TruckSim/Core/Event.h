@@ -19,11 +19,12 @@ inline std::string EventTypeToString(EventType type)
     case EventType::TruckArriveDump:        return "TruckArriveDump";
     case EventType::TruckFinishDumping:     return "TruckFinishDumping";
     }
+    return "Unknown";
 }
 
 struct Event
 {
-    double time;
+    float time;
     TruckId truck;
     ShovelId shovel;
     DumpId dump;

@@ -10,7 +10,7 @@
 class Shovel : public StationaryEntity
 {
 public:
-    Shovel(int id_, Position _position, double loadSpeed) : StationaryEntity(id_, _position), loadSpeed(loadSpeed) {}
+    Shovel(int id_, Position _position, float loadSpeed) : StationaryEntity(id_, _position), loadSpeed(loadSpeed) {}
 
     ShovelId GetShovelId() const
     {
@@ -22,7 +22,7 @@ public:
         return static_cast<int>(waitingQueue.size());
     }
     
-    double TimeToLoad(const Truck& truck) const
+    float TimeToLoad(const Truck& truck) const
     {
         return truck.RemainingCapacity() / loadSpeed;
     }
@@ -53,6 +53,6 @@ public:
     
 private:
     // Time per unit (define actual metric later. For now, say tonnes per minute?)
-    double loadSpeed = 0;
+    float loadSpeed = 0;
     std::deque<TruckId> waitingQueue;
 };

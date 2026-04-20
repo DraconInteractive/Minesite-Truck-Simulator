@@ -9,7 +9,7 @@
 class Dump : public StationaryEntity
 {
 public:
-    Dump(int id_, Position _position, double dumpSpeed) : StationaryEntity(id_, _position), dumpSpeed(dumpSpeed){}
+    Dump(int id_, Position _position, float dumpSpeed) : StationaryEntity(id_, _position), dumpSpeed(dumpSpeed){}
 
     DumpId GetDumpId() const
     {
@@ -21,7 +21,7 @@ public:
         return static_cast<int>(waitingQueue.size());
     }
     
-    double TimeToDump(const Truck& truck) const
+    float TimeToDump(const Truck& truck) const
     {
         return truck.CurrentLoad() / dumpSpeed;
     }
@@ -52,6 +52,6 @@ public:
 
 private:
     // Time per unit, for now say tonnes per minute
-    double dumpSpeed = 0;
+    float dumpSpeed = 0;
     std::deque<TruckId> waitingQueue;
 };
