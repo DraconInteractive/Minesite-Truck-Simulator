@@ -14,7 +14,7 @@ Config Config::Load(const std::string& path)
    Config cfg;                                                                               
                                                                                              
    for (auto& t : j["trucks"])                                                               
-       cfg.trucks.push_back({ t["id"], t["speed"], t["capacity"] });                         
+       cfg.trucks.push_back({ t["id"], t["ladenSpeed"], t["unladenSpeed"], t["capacity"] });                         
                                                                                              
    for (auto& s : j["shovels"])                                                              
        cfg.shovels.push_back({ s["id"], s["x"], s["y"], s["loadSpeed"] });                   
@@ -47,7 +47,7 @@ SimState Config::BuildSimState(const Config& cfg)
     sim.routing = cfg.routing;
 
     for (auto& t : cfg.trucks)
-        sim.trucks.emplace_back(t.id, t.speed, t.capacity, 0);
+        sim.trucks.emplace_back(t.id, t.ladenSpeed, t.unladenSpeed, t.capacity, 0);
 
     for (auto& s : cfg.shovels)
         sim.shovels.emplace_back(s.id, Position{s.x, s.y}, s.loadSpeed);

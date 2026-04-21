@@ -13,4 +13,10 @@ namespace Utilities
         float distance = std::sqrt(dx * dx + dy * dy);
         return (distance / speed) * 60; // return time in km/minute to fit in time step
     }
+
+    template<typename T>                                            
+    static T Lerp(T a, T b, float t)                                
+    {                                                               
+        return a + (b - a) * t;                                     
+    } 
 };

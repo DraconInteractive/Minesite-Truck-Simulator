@@ -3,6 +3,7 @@
 
 #include "MobileEntity.h"
 #include "../../Core/Event.h"
+#include "../../Core/Utilities.h"
 
 enum class TruckState
 {
@@ -29,7 +30,7 @@ inline std::string TruckStateToString(TruckState state)
 class Truck : public MobileEntity
 {
 public:
-    Truck(int id_, float speed, int capacity, int currentLoad) : MobileEntity(id_, speed), capacity(capacity), currentLoad(currentLoad) {} // TODO make a sort of construction DTO so we can create an entity from a config
+    Truck(int id_, float ladenSpeed, float unladenSpeed, int capacity, int currentLoad) : MobileEntity(id_), capacity(capacity), currentLoad(currentLoad), ladenSpeed(ladenSpeed), unladenSpeed(unladenSpeed) {} // TODO make a sort of construction DTO so we can create an entity from a config
 
     void StartTask(float startTime, Event scheduledEvent)
     {
@@ -47,11 +48,16 @@ public:
         state = newState;
         std::cout << "Truck " << id << " is now " + TruckStateToString(state) << "\n";
     }
-
+    
     // Just for rendering right now, so we can plot where from/to trucks are going
     // Public, it doesnt matter what touches this in the current state
     Position targetPosition = {0,0};
 
+    float GetSpeed() const override
+    {
+        return Utilities::Lerp(unladenSpeed, ladenSpeed, static_cast<float>(currentLoad) / static_cast<float>(capacity));
+    }
+    
     int RemainingCapacity() const
     {
         return capacity - currentLoad;
@@ -123,7 +129,11 @@ public:
 private:
     int capacity = 0;
     int currentLoad = 0;
+    float ladenSpeed = 0;
+    float unladenSpeed = 0;
+    
     float timeTaskStarted = 0;
     Event nextEvent = {};
+    
     TruckState state = TruckState::Idle;
 };

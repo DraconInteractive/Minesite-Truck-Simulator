@@ -6,7 +6,7 @@
 #include "../Types/DebugConfig.h"
 #include "../Types/RoutingConfig.h"
 
-struct TruckConfig   { int id; float speed; int capacity; };
+struct TruckConfig   { int id; float ladenSpeed; float unladenSpeed; int capacity; };
 struct ShovelConfig  { int id; float x, y; float loadSpeed; };
 struct DumpConfig    { int id; float x, y; float dumpSpeed; };
 struct SeedEvent     { int truckId; int shovelId; float arrivalTime; };
