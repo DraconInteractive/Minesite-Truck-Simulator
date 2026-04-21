@@ -11,49 +11,22 @@ struct SimState;
 class Shovel : public StationaryEntity
 {
 public:
-    Shovel(int id_, Position _position, float loadSpeed) : StationaryEntity(id_, _position), loadSpeed(loadSpeed) {}
+    Shovel(int id_, Position _position, float loadSpeed) : StationaryEntity(id_, _position, loadSpeed) {}
 
     ShovelId GetShovelId() const
     {
         return ShovelId{GetId()};
     }
-    
-    int TrucksInQueue() const
+
+    float TimeToProcess(const Truck& truck) const override
     {
-        return static_cast<int>(waitingQueue.size());
-    }
-    
-    float TimeToLoad(const Truck& truck) const
-    {
-        return truck.RemainingCapacity() / loadSpeed;
-    }
-    
-    void EnqueueTruck(TruckId truck)
-    {
-        std::cout << "Adding truck " << truck.value << " to queue at shovel " << id << "\n";
-        waitingQueue.push_back(truck);
-    }
-    
-    void DequeueTruck()
-    {
-        std::cout << "Removing truck from queue at shovel " << id << "\n";
-        waitingQueue.pop_front();
-    }
-    
-    TruckId GetFirst() const
-    {
-        return waitingQueue.front();
+        return truck.RemainingCapacity() / processSpeed;
     }
 
-    const std::deque<TruckId>& GetQueue() const
+    bool IsDestination(const Event& evt) const override
     {
-        return waitingQueue;
+        return evt.shovel == GetShovelId();
     }
     
     static ShovelId GetBestShovel(const SimState& sim, const Truck& truck, float travelTimePriority = 1, float queuePriority = 1);
-    
-private:
-    // Time per unit (define actual metric later. For now, say tonnes per minute?)
-    float loadSpeed = 0;
-    std::deque<TruckId> waitingQueue;
 };

@@ -18,7 +18,7 @@ void Simulation::HandleTruckArriveShovel(SimState& sim, const Event& evt)
 
     if (shovel.TrucksInQueue() == 1) // Only queue event if first in line, trucks in line will trigger when first leaves queue
     {
-        const float duration = shovel.TimeToLoad(truck) ;
+        const float duration = shovel.TimeToProcess(truck) ;
         auto finishLoadingEvt = Event{sim.currentTime + duration, evt.truck, evt.shovel, {}, EventType::TruckFinishLoading};
         truck.SetState(TruckState::Loading);
         truck.StartTask(sim.currentTime, finishLoadingEvt);
@@ -48,7 +48,7 @@ void Simulation::HandleTruckFinishLoading(SimState& sim, const Event& evt)
         const TruckId nextTruckId = shovel.GetFirst();
         Truck& nextTruck = sim.trucks[nextTruckId.value];
         nextTruck.SetState(TruckState::Loading);
-        float loadDuration = shovel.TimeToLoad(nextTruck);
+        float loadDuration = shovel.TimeToProcess(nextTruck);
         auto finishLoadingEvt = Event{sim.currentTime + loadDuration, nextTruckId, evt.shovel, {}, EventType::TruckFinishLoading};
         nextTruck.StartTask(sim.currentTime, finishLoadingEvt);
         sim.evtQueue.push(finishLoadingEvt);
@@ -66,7 +66,7 @@ void Simulation::HandleTruckArriveDump(SimState& sim, const Event& evt)
     if (dump.TrucksInQueue() == 1)
     {
         truck.SetState(TruckState::Dumping);
-        float duration = dump.TimeToDump(truck);
+        float duration = dump.TimeToProcess(truck);
         auto finishDumpingEvt = Event{sim.currentTime + duration, evt.truck, {}, evt.dump, EventType::TruckFinishDumping};
         truck.StartTask(sim.currentTime, finishDumpingEvt);
         sim.evtQueue.push(finishDumpingEvt);
@@ -94,7 +94,7 @@ void Simulation::HandleTruckFinishDumping (SimState& sim, const Event& evt)
         TruckId nextTruckId = dump.GetFirst();
         Truck& nextTruck = sim.trucks[nextTruckId.value];
         nextTruck.SetState(TruckState::Dumping);
-        float dumpDuration = dump.TimeToDump(nextTruck);
+        float dumpDuration = dump.TimeToProcess(nextTruck);
         Event finishDumpEvtEvent{sim.currentTime + dumpDuration, nextTruckId, {}, evt.dump, EventType::TruckFinishDumping};
         nextTruck.StartTask(sim.currentTime, finishDumpEvtEvent);
         sim.evtQueue.push(finishDumpEvtEvent);
