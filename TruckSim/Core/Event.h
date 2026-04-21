@@ -4,6 +4,7 @@
 
 enum class EventType : uint8_t
 {
+    TruckEnterSimulation,
     TruckArriveShovel,
     TruckFinishLoading,
     TruckArriveDump,
@@ -14,6 +15,7 @@ inline std::string EventTypeToString(EventType type)
 {
     switch (type)
     {
+    case EventType::TruckEnterSimulation:   return "TruckEnterSimulation";
     case EventType::TruckArriveShovel:      return "TruckArriveShovel";
     case EventType::TruckFinishLoading:     return "TruckFinishLoading";
     case EventType::TruckArriveDump:        return "TruckArriveDump";

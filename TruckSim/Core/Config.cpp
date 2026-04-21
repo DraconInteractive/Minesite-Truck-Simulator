@@ -57,8 +57,9 @@ SimState Config::BuildSimState(const Config& cfg)
 
     for (auto& e : cfg.seedEvents)
     {
-        Event evt{e.arrivalTime, TruckId{e.truckId}, ShovelId{e.shovelId}, {}, EventType::TruckArriveShovel};
+        Event evt{e.arrivalTime, TruckId{e.truckId}, ShovelId{e.shovelId}, {}, EventType::TruckEnterSimulation};
         sim.trucks[e.truckId].StartTask(0, evt);
+        sim.trucks[e.truckId].SetState(TruckState::Idle); // Set truck to idle before entry event is processed
         sim.evtQueue.push(evt);
     }
 

@@ -3,7 +3,8 @@
 #include "../Types/SimState.h"
 
 namespace Simulation                                                                                
-{                                       
+{
+    void HandleTruckEnterSimulation (SimState& sim, const Event& evt);
     void HandleTruckArriveShovel    (SimState& sim, const Event& evt);                                
     void HandleTruckFinishLoading   (SimState& sim, const Event& evt);                                
     void HandleTruckArriveDump      (SimState& sim, const Event& evt);                                

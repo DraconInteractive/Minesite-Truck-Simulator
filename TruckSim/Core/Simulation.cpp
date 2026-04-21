@@ -2,6 +2,12 @@
 
 #include "Utilities.h"
 
+void Simulation::HandleTruckEnterSimulation (SimState& sim, const Event& evt)
+{
+    // Will use predictive queue to find best shovel as it enters the sim
+    DispatchTruckToShovel(sim, evt.truck);
+}
+
 void Simulation::HandleTruckArriveShovel(SimState& sim, const Event& evt)                           
 {                                                                                                   
     Shovel& shovel = sim.shovels[evt.shovel.value];

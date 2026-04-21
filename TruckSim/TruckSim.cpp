@@ -59,6 +59,11 @@ int main(int argc, char* argv[])
 
         switch (evt.type)
         {
+            case EventType::TruckEnterSimulation:
+            {
+                Simulation::HandleTruckEnterSimulation(sim, evt);
+                break;
+            }
             case EventType::TruckArriveShovel:
             {
                 Simulation::HandleTruckArriveShovel(sim, evt);
