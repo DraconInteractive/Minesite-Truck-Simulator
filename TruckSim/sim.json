@@ -4,7 +4,17 @@
     { "id": 1, "speed": 30, "capacity": 400 },
     { "id": 2, "speed": 30, "capacity": 400 },
     { "id": 3, "speed": 30, "capacity": 400 },
-    { "id": 4, "speed": 30, "capacity": 400 }
+    { "id": 4, "speed": 30, "capacity": 400 },
+    { "id": 5, "speed": 30, "capacity": 400 },
+    { "id": 6, "speed": 30, "capacity": 400 },
+    { "id": 7, "speed": 30, "capacity": 400 },
+    { "id": 8, "speed": 30, "capacity": 400 },
+    { "id": 9, "speed": 30, "capacity": 400 },
+    { "id": 10, "speed": 30, "capacity": 400 },
+    { "id": 11, "speed": 30, "capacity": 400 },
+    { "id": 12, "speed": 30, "capacity": 400 },
+    { "id": 13, "speed": 30, "capacity": 400 },
+    { "id": 14, "speed": 30, "capacity": 400 }
   ],
   "shovels": [
     { "id": 0, "x":  5, "y": 10, "loadSpeed": 120 },
@@ -13,14 +23,24 @@
   "dumps": [
     { "id": 0, "x": -3, "y":  6, "dumpSpeed": 160 },
     { "id": 1, "x":  5, "y": -3, "dumpSpeed": 160 },
-    { "id": 2, "x": -5, "y":  3, "dumpSpeed": 160 }
+    { "id": 2, "x": 2, "y":  3, "dumpSpeed": 160 }
   ],
   "seedEvents": [
-    { "truckId": 0, "shovelId": 0, "arrivalTime": 2 },
-    { "truckId": 1, "shovelId": 0, "arrivalTime": 3 },
-    { "truckId": 2, "shovelId": 0, "arrivalTime": 4 },
-    { "truckId": 3, "shovelId": 1, "arrivalTime": 5 },
-    { "truckId": 4, "shovelId": 1, "arrivalTime": 5 }
+    { "truckId": 0, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 1, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 2, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 3, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 4, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 5, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 6, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 7, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 8, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 9, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 10, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 11, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 12, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 13, "shovelId": 0, "arrivalTime": 1 },
+    { "truckId": 14, "shovelId": 0, "arrivalTime": 1 }
   ],
   "routing": { "distancePriority": 1.0, "queuePriority": 1.0 },
   "debug":   { "logEvents": true, "timeCap": 1000 }

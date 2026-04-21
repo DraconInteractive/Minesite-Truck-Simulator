@@ -5,6 +5,7 @@
 
 #include "../EntityIdTypes.h"
 
+struct SimState;
 
 class Dump : public StationaryEntity
 {
@@ -48,7 +49,7 @@ public:
         return waitingQueue;
     }
     
-    static DumpId GetBestDump(Truck& truck, std::vector<Dump>& dumps, float travelTimePriority = 1, float queuePriority = 1);
+    static DumpId GetBestDump(const SimState& sim, const Truck& truck, float travelTimePriority = 1, float queuePriority = 1);
 
 private:
     // Time per unit, for now say tonnes per minute

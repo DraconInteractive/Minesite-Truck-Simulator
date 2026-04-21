@@ -103,7 +103,7 @@ void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
     
     truck.SetState(TruckState::Travelling);
     
-    const DumpId bestDump = Dump::GetBestDump(truck, sim.dumps);
+    const DumpId bestDump = Dump::GetBestDump(sim, truck);
     const Position dumpPos = sim.dumps[bestDump.value].GetPosition();
     const float travelTimeToDump = Utilities::GetTravelTime(truck.GetPosition(), dumpPos, truck.GetSpeed());
     truck.targetPosition = dumpPos;
@@ -120,7 +120,7 @@ void Simulation::DispatchTruckToShovel(SimState& sim, TruckId truckId)
     
     truck.SetState(TruckState::Travelling);
     
-    ShovelId bestShovelId = Shovel::GetBestShovel(truck, sim.shovels);
+    ShovelId bestShovelId = Shovel::GetBestShovel(sim, truck);
     const float travelTime = Utilities::GetTravelTime(truck.GetPosition(), sim.shovels[bestShovelId.value].GetPosition(), truck.GetSpeed());
     truck.targetPosition = sim.shovels[bestShovelId.value].GetPosition();
 

@@ -29,4 +29,5 @@ struct Event
     ShovelId shovel;
     DumpId dump;
     EventType type;
+    std::string debug;
 };

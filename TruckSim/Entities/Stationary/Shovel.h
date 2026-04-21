@@ -6,6 +6,7 @@
 
 #include "../EntityIdTypes.h"
 
+struct SimState;
 
 class Shovel : public StationaryEntity
 {
@@ -49,7 +50,7 @@ public:
         return waitingQueue;
     }
     
-    static ShovelId GetBestShovel(Truck& truck, std::vector<Shovel>& shovels, float travelTimePriority = 1, float queuePriority = 1);
+    static ShovelId GetBestShovel(const SimState& sim, const Truck& truck, float travelTimePriority = 1, float queuePriority = 1);
     
 private:
     // Time per unit (define actual metric later. For now, say tonnes per minute?)

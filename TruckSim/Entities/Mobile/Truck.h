@@ -113,7 +113,11 @@ public:
         if (total <= 0) return 1.0f;
         const float t = (currentTime - timeTaskStarted) / total;
         return t < 0.f ? 0.f : t > 1.f ? 1.f : t;
+    }
 
+    Event GetNextEvent() const
+    {
+        return nextEvent;
     }
     
 private:
