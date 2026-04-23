@@ -1,0 +1,3 @@
+C:\Users\pmc10\RiderProjects\TruckSim\x64\Debug\sim.json
+C:\Users\pmc10\RiderProjects\TruckSim\TruckSim\x64\Debug\TruckSim.vcxproj.Up2Date
+C:\Users\pmc10\RiderProjects\TruckSim\x64\Debug\loadout_dumptruck_01.json

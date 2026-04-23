@@ -28,17 +28,17 @@ inline void RenderTruck(const Truck& t, Vector2 v, float labelX, float labelY, F
     case TruckState::Loading:    c = GREEN;   break;
     case TruckState::Queueing:   c = ORANGE;  break;
     case TruckState::Dumping:    c = PURPLE;  break;
+    case TruckState::Broken:     c = RED;     break;
     default: c = WHITE; break;
     }
     
     DrawCircleV(v, 8, c);
-
+    
     DrawTextEx(labelFont, ("T" + std::to_string(t.GetId())).c_str(), {labelX, labelY}, 16, 1, WHITE);
 }
 
 inline void Render(const SimState& sim, Event evt, Font font)
 {
-    BeginDrawing();
     ClearBackground(BLACK);
 
     // Origin crosshair
@@ -105,12 +105,20 @@ inline void Render(const SimState& sim, Event evt, Font font)
     DrawText(("t=" + std::to_string(static_cast<int>(sim.currentTime))).c_str(), 10,
 10, 20, WHITE);
 
-    DrawText(("T" + std::to_string(sim.trucks[evt.truck.value].GetId()) + ": " + EventTypeToString(evt.type)).c_str(), 10, 35, 20, WHITE);
-    
-    // Key prompt
-    DrawText("Press any key...", 10, 578, 16, DARKGRAY);
+    std::string evtLabel = evt.truck.value >= 0
+          ? "T" + std::to_string(sim.trucks[evt.truck.value].GetId()) + ": " + EventTypeToString(evt.type)
+          : "Waiting...";
+    DrawText(evtLabel.c_str(), 10, 35, 20, WHITE);
 
-    EndDrawing();
+    if (sim.isPaused)
+    {
+        // Key prompt
+        DrawText("Press the space key to resume...", 10, 578, 16, DARKGRAY);
+    }
+    else
+    {
+        DrawText("Press the space key to pause...", 10, 578, 16, DARKGRAY);
+    }
 }
 
 

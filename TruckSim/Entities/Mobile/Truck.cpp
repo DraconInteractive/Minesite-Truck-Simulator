@@ -21,9 +21,5 @@ int Truck::RollForFailure()
         return worstFail;
     }
 
-    // No failure — apply wear
-    for (auto& p : parts)
-        p.health = std::max(0.0f, p.health - p.wearPerCycle);
-
     return -1;
 }

@@ -108,8 +108,33 @@ void Simulation::HandleTruckFinishDumping (SimState& sim, const Event& evt)
     }
 }
 
-// Helpers
+void Simulation::HandleTruckPartFail(SimState& sim, const Event& evt)
+{
+    Truck& truck = sim.trucks[evt.truck.value];
+    const EntityPart& part = truck.GetBrokenPart();
+    Event fixedEvt = {sim.currentTime + part.repairTime, evt.truck, {}, {}, EventType::TruckPartFixed};
+    truck.StartTask(sim.currentTime, fixedEvt);
 
+    sim.evtQueue.push(fixedEvt);
+}
+
+void Simulation::HandleTruckPartFixed(SimState& sim, const Event& evt)
+{
+    Truck& truck = sim.trucks[evt.truck.value];
+
+    truck.RepairBrokenPart();
+
+    if (truck.CurrentLoad() > 0)
+    {
+        DispatchTruckToDump(sim, evt.truck);
+    }
+    else
+    {
+        DispatchTruckToShovel(sim, evt.truck);
+    }
+}
+
+// Helpers
 void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
 {
     Truck& truck = sim.trucks[truckId.value];
@@ -121,6 +146,19 @@ void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
     const float travelTimeToDump = Utilities::GetTravelTime(truck.GetPosition(), dumpPos, truck.GetSpeed());
     truck.targetPosition = dumpPos;
 
+    int fail = truck.RollForFailure();
+    if (fail != -1)
+    {
+        float travelTimeBeforeFail = travelTimeToDump * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+        auto truckFailedEvt = Event{sim.currentTime + travelTimeBeforeFail, truckId, {}, {}, EventType::TruckPartFail};
+        truck.StartTask(sim.currentTime, truckFailedEvt);
+        sim.evtQueue.push(truckFailedEvt);
+        return;
+    }
+
+    // Didnt fail, so apply wear to parts
+    truck.ApplyWear();
+    
     auto arriveAtDumpEvt = Event{sim.currentTime + travelTimeToDump, truckId, {}, bestDump, EventType::TruckArriveDump};
     truck.StartTask(sim.currentTime, arriveAtDumpEvt);
 
@@ -137,8 +175,21 @@ void Simulation::DispatchTruckToShovel(SimState& sim, TruckId truckId)
     const float travelTime = Utilities::GetTravelTime(truck.GetPosition(), sim.shovels[bestShovelId.value].GetPosition(), truck.GetSpeed());
     truck.targetPosition = sim.shovels[bestShovelId.value].GetPosition();
 
+    int fail = truck.RollForFailure();
+    if (fail != -1)
+    {
+        float travelTimeBeforeFail = travelTime * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+        auto truckFailedEvt = Event{sim.currentTime + travelTimeBeforeFail, truckId, {}, {}, EventType::TruckPartFail};
+        truck.StartTask(sim.currentTime, truckFailedEvt);
+        sim.evtQueue.push(truckFailedEvt);
+        return;
+    }
+
+    truck.ApplyWear();
+    
     auto arriveAtShovelEvt = Event{sim.currentTime + travelTime, truckId, bestShovelId, {}, EventType::TruckArriveShovel};
     truck.StartTask(sim.currentTime, arriveAtShovelEvt);
 
     sim.evtQueue.push(arriveAtShovelEvt);
 }
+

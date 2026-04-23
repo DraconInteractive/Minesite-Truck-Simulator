@@ -19,4 +19,5 @@ struct SimState
     std::priority_queue<Event, std::vector<Event>, CompareByTime> evtQueue;
     float currentTime = 0;
     RoutingConfig routing;
+    bool isPaused;
 };

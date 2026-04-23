@@ -12,4 +12,7 @@ namespace Simulation
 
     void DispatchTruckToDump        (SimState& sim, TruckId truckId);
     void DispatchTruckToShovel      (SimState& sim, TruckId truckId);
+
+    void HandleTruckPartFail        (SimState& sim, const Event& evt);
+    void HandleTruckPartFixed       (SimState& sim, const Event& evt);
 } 

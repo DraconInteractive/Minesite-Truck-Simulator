@@ -15,7 +15,7 @@ struct SeedEvent     { int truckId; float arrivalTime; };
 struct PartConfig
 {
     std::string name;
-    float repairTime;
+float repairTime;
     float baseFailRate;
     float wearPerCycle;
 };

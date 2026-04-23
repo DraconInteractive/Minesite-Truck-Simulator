@@ -140,6 +140,12 @@ public:
         return parts[brokenPartIndex];
     }
 
+    void ApplyWear()
+    {
+        for (auto& p : parts)
+            p.health = std::max(0.0f, p.health - p.wearPerCycle);
+    }
+    
     int RollForFailure();
     
     void RepairBrokenPart()
