@@ -1,17 +1,30 @@
 ﻿#pragma once
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include "../Types/SimState.h"
 #include "../Types/DebugConfig.h"
 #include "../Types/RoutingConfig.h"
 
-struct TruckConfig   { int id; float ladenSpeed; float unladenSpeed; int capacity; };
+struct TruckConfig   { int id; float ladenSpeed; float unladenSpeed; int capacity; std::string loadoutFile; };
 struct ShovelConfig  { int id; float x, y; float loadSpeed; };
 struct DumpConfig    { int id; float x, y; float dumpSpeed; };
-struct SeedEvent     { int truckId; int shovelId; float arrivalTime; };
+struct SeedEvent     { int truckId; float arrivalTime; };
 
+struct PartConfig
+{
+    std::string name;
+    float repairTime;
+    float baseFailRate;
+    float wearPerCycle;
+};
 
+struct LoadoutConfig
+{
+    std::string name;
+    std::vector<PartConfig> parts;
+};
 
 struct Config
 {
@@ -19,6 +32,8 @@ struct Config
     std::vector<ShovelConfig> shovels;
     std::vector<DumpConfig>   dumps;
     std::vector<SeedEvent>    seedEvents;
+    std::unordered_map<std::string, LoadoutConfig> loadouts;
+    
     RoutingConfig             routing;
     DebugConfig               debug;
 

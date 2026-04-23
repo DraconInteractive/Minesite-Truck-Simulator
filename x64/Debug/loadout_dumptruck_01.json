@@ -1,0 +1,11 @@
+﻿{
+  "name": "Standard Dump Truck",
+  "parts": [
+    { "name": "Axle",            "repairTime": 180,
+      "baseFailRate": 0.005, "wearPerCycle": 0.006 },
+    { "name": "Tires",           "repairTime": 30,
+      "baseFailRate": 0.010, "wearPerCycle": 0.015 },
+    { "name": "Tray Hydraulics", "repairTime": 180,
+      "baseFailRate": 0.002, "wearPerCycle": 0.003 }
+  ]
+}

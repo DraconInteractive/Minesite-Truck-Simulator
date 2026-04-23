@@ -400,11 +400,15 @@
     <ClInclude Include="Entities\Stationary\StationaryEntity.h" />
     <ClInclude Include="Rendering\Renderer.h" />
     <ClInclude Include="Types\DebugConfig.h" />
+    <ClInclude Include="Types\EntityPart.h" />
     <ClInclude Include="Types\Position.h" />
     <ClInclude Include="Types\RoutingConfig.h" />
     <ClInclude Include="Types\SimState.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="loadout_dumptruck_01.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="sim.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

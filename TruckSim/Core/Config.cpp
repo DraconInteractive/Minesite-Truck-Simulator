@@ -4,6 +4,21 @@
 #include <nlohmann/json.hpp>                                                                 
 using json = nlohmann::json;
 
+static LoadoutConfig LoadLoadout(const std::string& path)
+{
+    std::ifstream file(path);
+    
+    if (!file.is_open()) throw std::runtime_error("Could not open loadout file: " + path);
+    
+    json j = json::parse(file);
+    LoadoutConfig lc;
+    lc.name = j["name"];
+    for (auto& p : j["parts"])
+        lc.parts.push_back({ p["name"], p["repairTime"],p["baseFailRate"], p["wearPerCycle"] });
+    return lc;
+}
+
+
 Config Config::Load(const std::string& path)                                                  
 {                                                                                             
    std::ifstream file(path);                                                                 
@@ -13,8 +28,13 @@ Config Config::Load(const std::string& path)
    json j = json::parse(file);                                                               
    Config cfg;                                                                               
                                                                                              
-   for (auto& t : j["trucks"])                                                               
-       cfg.trucks.push_back({ t["id"], t["ladenSpeed"], t["unladenSpeed"], t["capacity"] });                         
+   for (auto& t : j["trucks"])
+   {
+       std::string lf = t["loadoutFile"];
+       if (cfg.loadouts.find(lf) == cfg.loadouts.end())
+           cfg.loadouts[lf] = LoadLoadout(lf); // helper: opens file, parses parts array
+       cfg.trucks.push_back({ t["id"], t["ladenSpeed"], t["unladenSpeed"], t["capacity"], lf });                         
+   }
                                                                                              
    for (auto& s : j["shovels"])                                                              
        cfg.shovels.push_back({ s["id"], s["x"], s["y"], s["loadSpeed"] });                   
@@ -23,7 +43,7 @@ Config Config::Load(const std::string& path)
        cfg.dumps.push_back({ d["id"], d["x"], d["y"], d["dumpSpeed"] });                     
                                                                                              
    for (auto& e : j["seedEvents"])                                                           
-       cfg.seedEvents.push_back({ e["truckId"], e["shovelId"], e["arrivalTime"] });          
+       cfg.seedEvents.push_back({ e["truckId"], e["arrivalTime"] });          
                                                                                              
    // Optional blocks — use defaults from struct if absent                                   
    if (j.contains("routing"))                                                                
@@ -47,7 +67,16 @@ SimState Config::BuildSimState(const Config& cfg)
     sim.routing = cfg.routing;
 
     for (auto& t : cfg.trucks)
+    {
         sim.trucks.emplace_back(t.id, t.ladenSpeed, t.unladenSpeed, t.capacity, 0);
+
+        std::vector<EntityPart> entityParts;
+        for (const auto& p : cfg.loadouts.at(t.loadoutFile).parts)
+        {
+            entityParts.push_back({ p.name, 1.0f, p.repairTime, p.baseFailRate, p.wearPerCycle });
+        }
+        sim.trucks.back().SetParts(std::move(entityParts));
+    }
 
     for (auto& s : cfg.shovels)
         sim.shovels.emplace_back(s.id, Position{s.x, s.y}, s.loadSpeed);
@@ -57,7 +86,7 @@ SimState Config::BuildSimState(const Config& cfg)
 
     for (auto& e : cfg.seedEvents)
     {
-        Event evt{e.arrivalTime, TruckId{e.truckId}, ShovelId{e.shovelId}, {}, EventType::TruckEnterSimulation};
+        Event evt{e.arrivalTime, TruckId{e.truckId}, {}, {}, EventType::TruckEnterSimulation};
         sim.trucks[e.truckId].StartTask(0, evt);
         sim.trucks[e.truckId].SetState(TruckState::Idle); // Set truck to idle before entry event is processed
         sim.evtQueue.push(evt);

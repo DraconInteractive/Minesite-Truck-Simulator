@@ -8,7 +8,9 @@ enum class EventType : uint8_t
     TruckArriveShovel,
     TruckFinishLoading,
     TruckArriveDump,
-    TruckFinishDumping
+    TruckFinishDumping,
+    TruckPartFail,
+    TruckPartFixed
 };
 
 inline std::string EventTypeToString(EventType type)
@@ -20,6 +22,8 @@ inline std::string EventTypeToString(EventType type)
     case EventType::TruckFinishLoading:     return "TruckFinishLoading";
     case EventType::TruckArriveDump:        return "TruckArriveDump";
     case EventType::TruckFinishDumping:     return "TruckFinishDumping";
+    case EventType::TruckPartFail:          return "TruckPartFail";
+    case EventType::TruckPartFixed:         return "TruckPartFixed";
     }
     return "Unknown";
 }

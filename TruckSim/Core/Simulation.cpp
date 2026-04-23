@@ -4,6 +4,13 @@
 
 void Simulation::HandleTruckEnterSimulation (SimState& sim, const Event& evt)
 {
+    Truck& truck = sim.trucks[evt.truck.value];
+    std::cout << "Truck entering simulation. Parts:\n";
+    for (const EntityPart& part : truck.GetParts())
+    {
+        std::cout << " - " << part.name << "\n";
+    }
+    std::cout << "\n";
     // Will use predictive queue to find best shovel as it enters the sim
     DispatchTruckToShovel(sim, evt.truck);
 }

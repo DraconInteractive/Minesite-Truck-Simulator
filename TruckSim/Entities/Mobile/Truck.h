@@ -1,9 +1,11 @@
 ﻿#pragma once
 #include <iostream>
+#include <vector>
 
 #include "MobileEntity.h"
 #include "../../Core/Event.h"
 #include "../../Core/Utilities.h"
+#include "../../Types/EntityPart.h"
 
 enum class TruckState
 {
@@ -11,7 +13,8 @@ enum class TruckState
     Travelling,
     Loading,
     Queueing,
-    Dumping
+    Dumping,
+    Broken
 };
 
 inline std::string TruckStateToString(TruckState state)
@@ -23,6 +26,7 @@ inline std::string TruckStateToString(TruckState state)
         case TruckState::Loading:    return "Loading";
         case TruckState::Queueing:   return "Queueing";
         case TruckState::Dumping:    return "Dumping";
+        case TruckState::Broken:     return "Broken";
     }
     return "Unknown";
 }
@@ -125,7 +129,35 @@ public:
     {
         return nextEvent;
     }
+
+    bool IsBroken() const
+    {
+        return brokenPartIndex >= 0;
+    }
     
+    const EntityPart& GetBrokenPart() const
+    {
+        return parts[brokenPartIndex];
+    }
+
+    int RollForFailure();
+    
+    void RepairBrokenPart()
+    {
+        parts[brokenPartIndex].health = 1.0f;
+        brokenPartIndex = -1;
+    }
+
+    const std::vector<EntityPart>& GetParts() const
+    {
+        return parts;    
+    }
+    
+    void SetParts(std::vector<EntityPart> newParts)
+    {
+        parts = std::move(newParts);
+    }
+
 private:
     int capacity = 0;
     int currentLoad = 0;
@@ -134,6 +166,9 @@ private:
     
     float timeTaskStarted = 0;
     Event nextEvent = {};
+
+    std::vector<EntityPart> parts;
+    int brokenPartIndex = -1;
     
     TruckState state = TruckState::Idle;
 };
