@@ -5,7 +5,7 @@
 #include "MobileEntity.h"
 #include "../../Core/Event.h"
 #include "../../Core/Utilities.h"
-#include "../../Types/EntityPart.h"
+#include "../EntityPart.h"
 
 enum class TruckState
 {

@@ -4,6 +4,7 @@
 #include <limits>
 
 #include "../../Core/Utilities.h"
+#include "../../Navigation/Pathfinding.h"
 #include "../../Types/SimState.h"
 
 template<typename TSite>
@@ -26,7 +27,7 @@ int StationaryEntity::GetBestSite(const SimState& sim, const std::vector<TSite>&
         Position shovelPos = site.GetPosition();
         int siteId = site.GetId();
         
-        const float travelTime = Utilities::GetTravelTime(truckPos, shovelPos, truckSpeed);
+        const float travelTime = Navigation::GetTravelTimeByPosition(sim, truckPos, shovelPos, truckSpeed);
         std::cout << "Direct travel time: " << travelTime << "\n";
         
         float queueTime = 0;

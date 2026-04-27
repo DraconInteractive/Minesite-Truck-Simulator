@@ -49,8 +49,19 @@ public:
     template<typename TSite>
     static int GetBestSite(const SimState& sim, const std::vector<TSite>& sites, const Truck& truck, float travelTimePriority, float queuePriority);
 
+    void SetClosestNode(int nodeId)
+    {
+        closestNodeId = nodeId;
+    }
+
+    int GetClosestNodeId() const
+    {
+        return closestNodeId;
+    }
+
 protected:
     // Time per unit (define actual metric later. For now, say tonnes per minute?)
     float processSpeed = 0;
     std::deque<TruckId> waitingQueue;
+    int closestNodeId = -1;
 };

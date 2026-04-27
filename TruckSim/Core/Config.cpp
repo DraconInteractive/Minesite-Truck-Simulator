@@ -18,54 +18,61 @@ static LoadoutConfig LoadLoadout(const std::string& path)
     return lc;
 }
 
-
 Config Config::Load(const std::string& path)                                                  
 {                                                                                             
-   std::ifstream file(path);                                                                 
-   if (!file.is_open())                                                                      
-       throw std::runtime_error("Could not open config file: " + path);                      
+    std::ifstream file(path);                                                                 
+    if (!file.is_open())
+        throw std::runtime_error("Could not open config file: " + path);                      
                                                                                              
-   json j = json::parse(file);                                                               
-   Config cfg;                                                                               
+    json j = json::parse(file);                                                               
+    Config cfg;                                                                               
                                                                                              
-   for (auto& t : j["trucks"])
-   {
-       std::string lf = t["loadoutFile"];
-       if (cfg.loadouts.find(lf) == cfg.loadouts.end())
-           cfg.loadouts[lf] = LoadLoadout(lf); // helper: opens file, parses parts array
-       cfg.trucks.push_back({ t["id"], t["ladenSpeed"], t["unladenSpeed"], t["capacity"], lf });                         
-   }
+    for (auto& t : j["trucks"])
+    {
+        std::string lf = t["loadoutFile"];
+        if (cfg.loadouts.find(lf) == cfg.loadouts.end())
+            cfg.loadouts[lf] = LoadLoadout(lf); // helper: opens file, parses parts array
+        cfg.trucks.push_back({ t["id"], t["ladenSpeed"], t["unladenSpeed"], t["capacity"], lf });                         
+    }
                                                                                              
-   for (auto& s : j["shovels"])                                                              
-       cfg.shovels.push_back({ s["id"], s["x"], s["y"], s["loadSpeed"] });                   
+    for (auto& s : j["shovels"])                                                              
+        cfg.shovels.push_back({ s["id"], s["x"], s["y"], s["loadSpeed"] });                   
                                                                                              
-   for (auto& d : j["dumps"])                                                                
-       cfg.dumps.push_back({ d["id"], d["x"], d["y"], d["dumpSpeed"] });                     
+    for (auto& d : j["dumps"])                                                                
+        cfg.dumps.push_back({ d["id"], d["x"], d["y"], d["dumpSpeed"] });                     
                                                                                              
-   for (auto& e : j["seedEvents"])                                                           
-       cfg.seedEvents.push_back({ e["truckId"], e["arrivalTime"] });          
+    for (auto& e : j["seedEvents"])                                                           
+        cfg.seedEvents.push_back({ e["truckId"], e["arrivalTime"] });          
+
+    for (auto& n : j["nodes"])
+        cfg.nodes.push_back({n["id"], n["x"], n["y"]});
+
+    for (auto& e : j["edges"])
+        cfg.edges.push_back({e["id"], e["fromId"], e["toId"], e["speedMult"]});
+    
+    // Optional blocks — use defaults from struct if absent                                   
+    if (j.contains("routing"))                                                                
+    {                                                                                         
+        cfg.routing.distancePriority = j["routing"].value("distancePriority", 1.f);           
+        cfg.routing.queuePriority    = j["routing"].value("queuePriority",    1.f);           
+    }                                                                                         
                                                                                              
-   // Optional blocks — use defaults from struct if absent                                   
-   if (j.contains("routing"))                                                                
-   {                                                                                         
-       cfg.routing.distancePriority = j["routing"].value("distancePriority", 1.f);           
-       cfg.routing.queuePriority    = j["routing"].value("queuePriority",    1.f);           
-   }                                                                                         
+    if (j.contains("debug"))                                                                  
+    {                                                                                         
+        cfg.debug.logEvents     = j["debug"].value("logEvents",   true);                            
+        cfg.debug.timeCap       = j["debug"].value("timeCap",     1000.f);
+        cfg.debug.pauseOnFail   = j["debug"].value("pauseOnFail", false);
+    }                                                                                         
                                                                                              
-   if (j.contains("debug"))                                                                  
-   {                                                                                         
-       cfg.debug.logEvents = j["debug"].value("logEvents", true);                            
-       cfg.debug.timeCap   = j["debug"].value("timeCap",   1000.f);                          
-   }                                                                                         
-                                                                                             
-   return cfg;                                                                               
+    return cfg;                                                                               
 }
 
 SimState Config::BuildSimState(const Config& cfg)
 {
     SimState sim;
     sim.routing = cfg.routing;
-
+    sim.debug = cfg.debug;
+    
     for (auto& t : cfg.trucks)
     {
         sim.trucks.emplace_back(t.id, t.ladenSpeed, t.unladenSpeed, t.capacity, 0);
@@ -84,6 +91,50 @@ SimState Config::BuildSimState(const Config& cfg)
     for (auto& d : cfg.dumps)
         sim.dumps.emplace_back(d.id, Position{d.x, d.y}, d.dumpSpeed);
 
+    for (auto& n : cfg.nodes)
+        sim.nodes.emplace_back(Node{n.nodeId, n.x, n.y});
+
+    for (auto& e : cfg.edges)
+    {
+        sim.nodes[e.fromId].connectedEdges.push_back(e.edgeId);
+        sim.nodes[e.toId].connectedEdges.push_back(e.edgeId);
+        sim.edges.emplace_back(Edge{e.edgeId, e.fromId, e.toId, e.speedMultiplier});
+    }    
+
+    for (auto& shovel : sim.shovels)
+    {
+        float bestDist = std::numeric_limits<float>::max();
+        for (const Node& n : sim.nodes)                                                                 
+        {
+            Position shovelPos = shovel.GetPosition();
+            float dx = n.x - shovelPos.x;                                                    
+            float dy = n.y - shovelPos.y;                                                  
+            float d = dx*dx + dy*dy;                                                                    
+            if (d < bestDist)                                                                         
+            {
+                bestDist = d;
+                shovel.SetClosestNode(n.id);
+            }
+        }
+    }
+
+    for (auto& dump : sim.dumps)
+    {
+        float bestDist = std::numeric_limits<float>::max();
+        for (const Node& n : sim.nodes)                                                                 
+        {
+            Position dumpPos = dump.GetPosition();
+            float dx = n.x - dumpPos.x;                                                    
+            float dy = n.y - dumpPos.y;                                                  
+            float d = dx*dx + dy*dy;                                                                    
+            if (d < bestDist)                                                                         
+            {
+                bestDist = d;
+                dump.SetClosestNode(n.id);
+            }
+        }
+    }
+    
     for (auto& e : cfg.seedEvents)
     {
         Event evt{e.arrivalTime, TruckId{e.truckId}, {}, {}, EventType::TruckEnterSimulation};

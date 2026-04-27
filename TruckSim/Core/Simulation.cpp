@@ -1,6 +1,7 @@
 ﻿#include "Simulation.h"
 
 #include "Utilities.h"
+#include "../Navigation/Pathfinding.h"
 
 void Simulation::HandleTruckEnterSimulation (SimState& sim, const Event& evt)
 {
@@ -116,7 +117,10 @@ void Simulation::HandleTruckPartFail(SimState& sim, const Event& evt)
     Event fixedEvt = {sim.currentTime + part.repairTime, evt.truck, {}, {}, EventType::TruckPartFixed};
     truck.StartTask(sim.currentTime, fixedEvt);
 
-    sim.isPaused = true;
+    if (sim.debug.pauseOnFail)
+    {
+        sim.isPaused = true;
+    }
     sim.evtQueue.push(fixedEvt);
 }
 
@@ -144,7 +148,7 @@ void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
     truck.SetState(TruckState::Travelling);
     const DumpId bestDump = Dump::GetBestDump(sim, truck);
     const Position dumpPos = sim.dumps[bestDump.value].GetPosition();
-    const float travelTimeToDump = Utilities::GetTravelTime(truck.GetPosition(), dumpPos, truck.GetSpeed());
+    const float travelTimeToDump = Navigation::GetTravelTimeByPosition(sim, truck.GetPosition(), dumpPos, truck.GetSpeed());
     truck.targetPosition = dumpPos;
 
     int fail = truck.RollForFailure();
@@ -181,7 +185,7 @@ void Simulation::DispatchTruckToShovel(SimState& sim, TruckId truckId)
     truck.SetState(TruckState::Travelling);
     
     ShovelId bestShovelId = Shovel::GetBestShovel(sim, truck);
-    const float travelTime = Utilities::GetTravelTime(truck.GetPosition(), sim.shovels[bestShovelId.value].GetPosition(), truck.GetSpeed());
+    const float travelTime = Navigation::GetTravelTimeByPosition(sim, truck.GetPosition(), sim.shovels[bestShovelId.value].GetPosition(), truck.GetSpeed());
     truck.targetPosition = sim.shovels[bestShovelId.value].GetPosition();
 
     int fail = truck.RollForFailure();
