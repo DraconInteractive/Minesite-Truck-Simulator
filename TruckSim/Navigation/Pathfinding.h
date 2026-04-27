@@ -23,10 +23,14 @@ namespace Navigation
         return *best;
     }
 
+    struct PathResult { std::vector<int> nodes; float travelTime; };
+    
     // Assume that nodeId for Node and Edge correspond directly to sim.nodes[x] and sim.edges[x]
-    inline float GetTravelTimeById(const SimState& sim, int fromId, int toId, float truckSpeed)             
+    inline PathResult GetPathById(const SimState& sim, int fromId, int toId, float truckSpeed)             
     {                                                                                                   
         std::unordered_map<int, float> dist;
+        std::unordered_map<int, int> prev;
+        
         for (const Node& n : sim.nodes)                                                                 
             dist[n.id] = std::numeric_limits<float>::max();
         dist[fromId] = 0.f;                                                                             
@@ -60,19 +64,85 @@ namespace Navigation
                 if (newCost < dist[neighbour])
                 {
                     dist[neighbour] = newCost;
+                    prev[neighbour] = u;
                     pq.push({ newCost, neighbour });
                 }
             }
         }
 
-        return dist.count(toId) ? dist[toId] : std::numeric_limits<float>::max();
+        if (!dist.count(toId) || dist[toId] == std::numeric_limits<float>::max())
+            return { {}, std::numeric_limits<float>::max() };
+
+        // Reconstruct path by walking prev backwards
+        std::vector<int> path;
+        for (int cur = toId; cur != fromId; cur = prev[cur])
+            path.push_back(cur);
+        path.push_back(fromId);
+        std::reverse(path.begin(), path.end());
+
+        return { path, dist[toId] };
     }
 
-    inline float GetTravelTimeByPosition(const SimState& sim, Position a, Position b, float speed)
+    inline PathResult GetPathByPosition(const SimState& sim, Position a, Position b, float speed)
     {
         const Node nodeA = GetNodeFromPosition(sim, a.x, a.y);
         const Node nodeB = GetNodeFromPosition(sim, b.x, b.y);
 
-        return GetTravelTimeById(sim, nodeA.id, nodeB.id, speed);
+        return GetPathById(sim, nodeA.id, nodeB.id, speed);
+    }
+
+    inline int GetEdgeToNeighbour(const SimState& sim, int fromNode, int toNode)                               
+    {                                                                                                   
+        for (int edgeId : sim.nodes[fromNode].connectedEdges)                                           
+        {                                                                                               
+            const Edge& e = sim.edges[edgeId];                                                          
+            if (e.fromNode == toNode || e.toNode == toNode)                                             
+                return edgeId;                            
+        }
+        return -1; // no direct edge
+    }
+
+
+    inline Position GetPositionAlongPath(const SimState& sim, const std::vector<int>& pathNodes, float t, float truckSpeed)                                      
+    {
+        if (pathNodes.empty())
+            return {0.f, 0.f};
+        
+        if (pathNodes.size() == 1)                                                                      
+            return { sim.nodes[pathNodes[0]].x, sim.nodes[pathNodes[0]].y };
+                                                                                                      
+        // Compute total path time and per-segment times                                          
+        std::vector<float> segTimes;                                                                  
+        float totalTime = 0.f;                                                                          
+        for (int i = 0; i < (int)pathNodes.size() - 1; i++)                                             
+        {
+            const Node& a = sim.nodes[pathNodes[i]];
+            const Node& b = sim.nodes[pathNodes[i + 1]];
+            const Edge& e = sim.edges[GetEdgeToNeighbour(sim, a.id, b.id)];
+            float dx = b.x - a.x, dy = b.y - a.y;
+            float len = std::sqrt(dx*dx + dy*dy);
+            float segTime = (len / (truckSpeed * e.speedMultiplier))* 60.f;
+            segTimes.push_back(segTime);
+            totalTime += segTime;
+        }
+
+        // Find which segment t falls in
+        float target = t * totalTime;
+        float accumulated = 0.f;
+        for (int i = 0; i < (int)segTimes.size(); i++)
+        {
+            if (accumulated + segTimes[i] >= target)
+            {
+                float segT = (target - accumulated) / segTimes[i];
+                const Node& a = sim.nodes[pathNodes[i]];
+                const Node& b = sim.nodes[pathNodes[i + 1]];
+                return { a.x + (b.x - a.x) * segT, a.y + (b.y - a.y) * segT };
+            }
+            accumulated += segTimes[i];
+        }
+
+        // t >= 1, return destination
+        const Node& last = sim.nodes[pathNodes.back()];
+        return { last.x, last.y };
     }
 }

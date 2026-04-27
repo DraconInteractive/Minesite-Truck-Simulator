@@ -27,8 +27,8 @@ int StationaryEntity::GetBestSite(const SimState& sim, const std::vector<TSite>&
         Position shovelPos = site.GetPosition();
         int siteId = site.GetId();
         
-        const float travelTime = Navigation::GetTravelTimeByPosition(sim, truckPos, shovelPos, truckSpeed);
-        std::cout << "Direct travel time: " << travelTime << "\n";
+        const Navigation::PathResult navPath = Navigation::GetPathByPosition(sim, truckPos, shovelPos, truckSpeed);
+        std::cout << "Direct travel time: " << navPath.travelTime << "\n";
         
         float queueTime = 0;
 
@@ -53,7 +53,7 @@ int StationaryEntity::GetBestSite(const SimState& sim, const std::vector<TSite>&
             
             const float tTravelTime = t.EstTaskTimeRemaining(sim.currentTime);
             const auto& nextEvt = t.GetNextEvent();
-            if (site.IsDestination(nextEvt) && tTravelTime < travelTime)
+            if (site.IsDestination(nextEvt) && tTravelTime < navPath.travelTime)
             {
                 queueTime += tTravelTime + site.TimeToProcess(t);
             }
@@ -63,7 +63,7 @@ int StationaryEntity::GetBestSite(const SimState& sim, const std::vector<TSite>&
         std::cout << "Trucks en route: " << enRoute << "\n";
         std::cout << "Total queue time: " << queueTime << "\n";
         
-        const float score = (travelTime * travelTimePriority) + (queueTime * queuePriority);
+        const float score = (navPath.travelTime * travelTimePriority) + (queueTime * queuePriority);
         std::cout << "Score: " << score << "\n\n";
 
         if (score < bestScore)

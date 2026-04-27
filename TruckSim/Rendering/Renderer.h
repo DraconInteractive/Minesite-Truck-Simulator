@@ -6,6 +6,7 @@
 #include "../Entities/Mobile/Truck.h"
 #include "../Entities/Stationary/Shovel.h"
 #include "../Entities/Stationary/Dump.h"
+#include "../Navigation/Pathfinding.h"
 
 inline Vector2 worldToScreen(Position pos, float scale = 20.f, Vector2 offset = {400, 300})
 {
@@ -45,6 +46,21 @@ inline void Render(const SimState& sim, Event evt, Font font)
     DrawLine(0, 300, 800, 300, DARKGRAY);
     DrawLine(400, 0, 400, 600, DARKGRAY);
 
+    for (const auto& n : sim.nodes)
+    {
+        Vector2 sp = worldToScreen(Position{n.x, n.y});
+        DrawCircleV(sp, 5, LIGHTGRAY);
+    }
+
+    for (const auto& e : sim.edges)
+    {
+        Node a = sim.nodes[e.fromNode];
+        Node b = sim.nodes[e.toNode];
+        Vector2 spA = worldToScreen(Position{a.x, a.y});
+        Vector2 spB = worldToScreen(Position{b.x, b.y});
+        DrawLineEx(spA, spB, 3, LIGHTGRAY);
+    }
+    
     // Shovels
     for (const auto& s : sim.shovels)
     {
@@ -83,21 +99,26 @@ inline void Render(const SimState& sim, Event evt, Font font)
     
     for (const auto& t : sim.trucks)
     {
-        if (t.GetState() != TruckState::Travelling && t.GetState() != TruckState::Broken) continue;
-        
-        Vector2 start = worldToScreen(t.GetPosition());
-        Vector2 end = worldToScreen(t.targetPosition);
+        TruckState state = t.GetState();
 
-        float perc = t.EstTaskCompletionPercentage(sim.currentTime);
-        Position truckPos = t.GetPosition();
-        Position mid = truckPos + (t.targetPosition - truckPos) * perc;
-        Vector2 tp = worldToScreen(mid);
-        
+        if (state != TruckState::Travelling && state != TruckState::Broken) continue;
+
+        Position truckPos;
+        if (state == TruckState::Travelling)
+        {
+            truckPos = Navigation::GetPositionAlongPath(sim, t.GetPathNodeIds(), t.EstTaskCompletionPercentage(sim.currentTime), t.GetSpeed());
+        }
+        else if (state == TruckState::Broken)
+        {
+            truckPos = t.GetPosition();
+        }
+
+        Vector2 tp = worldToScreen(truckPos);
         RenderTruck(t, tp, tp.x, tp.y - 30, font);
 
         // Indicate direction of travel
-        DrawLine(start.x, start.y, tp.x, tp.y, RED);
-        DrawLine(tp.x, tp.y, end.x, end.y, YELLOW);
+        //DrawLine(start.x, start.y, tp.x, tp.y, RED);
+        //DrawLine(tp.x, tp.y, end.x, end.y, YELLOW);
     }
     
     

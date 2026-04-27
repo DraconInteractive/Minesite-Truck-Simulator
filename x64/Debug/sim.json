@@ -47,17 +47,31 @@
     { "id":  0, "x": 0, "y":  0},
     { "id":  1, "x": 5, "y":  10},
     { "id":  2, "x": 12, "y":  5},
-    { "id":  3, "x": -3, "y":  6},
-    { "id":  4, "x": 5, "y":  -3},
-    { "id":  5, "x": 2, "y":  3}
+    { "id":  3, "x": 5, "y": 5},
+    { "id":  4, "x": 2, "y":  5},
+    { "id":  5, "x": -3, "y":  6},
+    { "id":  6, "x": 5, "y":  -3},
+    { "id":  7, "x": 2, "y":  3},
+    { "id":  8, "x": 5, "y":  0},
+    { "id":  9, "x": 0, "y":  5},
+    { "id":  10, "x": 2, "y":  7}
   ],
   "edges": 
   [
-    { "id": 0, "fromId": 0, "toId": 1, "speedMult": 1 },
-    { "id": 1, "fromId": 0, "toId": 2, "speedMult": 1 },
-    { "id": 2, "fromId": 0, "toId": 3, "speedMult": 1 },
-    { "id": 3, "fromId": 0, "toId": 4, "speedMult": 1 },
-    { "id": 4, "fromId": 0, "toId": 5, "speedMult": 1 }
+    { "id": 0, "fromId": 1, "toId": 3, "speedMult": 1 },
+    { "id": 1, "fromId": 2, "toId": 3, "speedMult": 1 },
+    { "id": 2, "fromId": 4, "toId": 3, "speedMult": 1 },
+    { "id": 3, "fromId": 4, "toId": 9, "speedMult": 1 },
+    { "id": 4, "fromId": 4, "toId": 7, "speedMult": 1 },
+    { "id": 5, "fromId": 8, "toId": 0, "speedMult": 1 },
+    { "id": 6, "fromId": 8, "toId": 6, "speedMult": 1 },
+    { "id": 7, "fromId": 8, "toId": 3, "speedMult": 1 },
+    { "id": 8, "fromId": 8, "toId": 2, "speedMult": 1 },
+    { "id": 9, "fromId": 9, "toId": 5, "speedMult": 1 },
+    { "id": 10, "fromId": 9, "toId": 0, "speedMult": 1 },
+    { "id": 11, "fromId": 10, "toId": 5, "speedMult": 1 },
+    { "id": 12, "fromId": 10, "toId": 1, "speedMult": 1 },
+    { "id": 13, "fromId": 10, "toId": 7, "speedMult": 1 }
   ],
   "routing": { "distancePriority": 1.0, "queuePriority": 1.0 },
   "debug":   { "logEvents": true, "timeCap": 1000, "pauseOnFail": false }

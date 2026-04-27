@@ -164,6 +164,21 @@ public:
         parts = std::move(newParts);
     }
 
+    void SetPath(std::vector<int> newPath)
+    {
+        pathNodes = newPath;
+    }
+
+    const std::vector<int>& GetPathNodeIds() const
+    {
+        return pathNodes;
+    }
+    
+    void ClearPath()
+    {
+        pathNodes = {};
+    }
+
 private:
     int capacity = 0;
     int currentLoad = 0;
@@ -175,6 +190,8 @@ private:
 
     std::vector<EntityPart> parts;
     int brokenPartIndex = -1;
+
+    std::vector<int> pathNodes;
     
     TruckState state = TruckState::Idle;
 };

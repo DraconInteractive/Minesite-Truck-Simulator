@@ -21,7 +21,8 @@ void Simulation::HandleTruckArriveShovel(SimState& sim, const Event& evt)
     Shovel& shovel = sim.shovels[evt.shovel.value];
     Truck& truck = sim.trucks[evt.truck.value];
     truck.SetPosition(shovel.GetPosition());
-                    
+    truck.ClearPath();
+    
     shovel.EnqueueTruck(evt.truck);
 
     if (shovel.TrucksInQueue() == 1) // Only queue event if first in line, trucks in line will trigger when first leaves queue
@@ -69,6 +70,8 @@ void Simulation::HandleTruckArriveDump(SimState& sim, const Event& evt)
     Truck& truck = sim.trucks[evt.truck.value];
 
     truck.SetPosition(dump.GetPosition());
+    truck.ClearPath();
+    
     dump.EnqueueTruck(evt.truck);
 
     if (dump.TrucksInQueue() == 1)
@@ -141,27 +144,32 @@ void Simulation::HandleTruckPartFixed(SimState& sim, const Event& evt)
 }
 
 // Helpers
+// Current issue with dispath: path will snap truck position to nearest node.
+// This could be significant inaccuracy if truck is in middle of long edge
 void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
 {
     Truck& truck = sim.trucks[truckId.value];
     
     truck.SetState(TruckState::Travelling);
+    
     const DumpId bestDump = Dump::GetBestDump(sim, truck);
     const Position dumpPos = sim.dumps[bestDump.value].GetPosition();
-    const float travelTimeToDump = Navigation::GetTravelTimeByPosition(sim, truck.GetPosition(), dumpPos, truck.GetSpeed());
+    const Navigation::PathResult navPath = Navigation::GetPathByPosition(sim, truck.GetPosition(), dumpPos, truck.GetSpeed());
     truck.targetPosition = dumpPos;
-
+    truck.SetPath(navPath.nodes);
+    
     int fail = truck.RollForFailure();
     if (fail != -1)
     {
         truck.SetState(TruckState::Broken);
-        float progressBeforeFail =static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-        float travelTimeBeforeFail = travelTimeToDump * progressBeforeFail;
+        float progressBeforeFail = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        float travelTimeBeforeFail = navPath.travelTime * progressBeforeFail;
 
-        Position truckPos = truck.GetPosition();
-        Position progressPosition = truckPos + (dumpPos - truckPos) * progressBeforeFail;
+        Position progressPosition = Navigation::GetPositionAlongPath(sim, navPath.nodes, progressBeforeFail, truck.GetSpeed());
+        
         truck.SetPosition(progressPosition);
         truck.targetPosition = progressPosition;
+        truck.ClearPath();
         
         auto truckFailedEvt = Event{sim.currentTime + travelTimeBeforeFail, truckId, {}, {}, EventType::TruckPartFail};
         truck.StartTask(sim.currentTime, truckFailedEvt);
@@ -172,7 +180,7 @@ void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
     // Didnt fail, so apply wear to parts
     truck.ApplyWear();
     
-    auto arriveAtDumpEvt = Event{sim.currentTime + travelTimeToDump, truckId, {}, bestDump, EventType::TruckArriveDump};
+    auto arriveAtDumpEvt = Event{sim.currentTime + navPath.travelTime, truckId, {}, bestDump, EventType::TruckArriveDump};
     truck.StartTask(sim.currentTime, arriveAtDumpEvt);
 
     sim.evtQueue.push(arriveAtDumpEvt);
@@ -185,22 +193,34 @@ void Simulation::DispatchTruckToShovel(SimState& sim, TruckId truckId)
     truck.SetState(TruckState::Travelling);
     
     ShovelId bestShovelId = Shovel::GetBestShovel(sim, truck);
-    const float travelTime = Navigation::GetTravelTimeByPosition(sim, truck.GetPosition(), sim.shovels[bestShovelId.value].GetPosition(), truck.GetSpeed());
-    truck.targetPosition = sim.shovels[bestShovelId.value].GetPosition();
-
+    Position shovelPos = sim.shovels[bestShovelId.value].GetPosition();
+    
+    const Navigation::PathResult navPath = Navigation::GetPathByPosition(sim, truck.GetPosition(), shovelPos, truck.GetSpeed());
+    truck.targetPosition = shovelPos;
+    truck.SetPath(navPath.nodes);
+    
     int fail = truck.RollForFailure();
     if (fail != -1)
     {
-        float travelTimeBeforeFail = travelTime * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+        truck.SetState(TruckState::Broken);
+        float progressBeforeFail =static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        float travelTimeBeforeFail = navPath.travelTime * progressBeforeFail;
+
+        Position progressPosition = Navigation::GetPositionAlongPath(sim, navPath.nodes, progressBeforeFail, truck.GetSpeed());
+        truck.SetPosition(progressPosition);
+        truck.targetPosition = progressPosition;
+        truck.ClearPath();
+
         auto truckFailedEvt = Event{sim.currentTime + travelTimeBeforeFail, truckId, {}, {}, EventType::TruckPartFail};
         truck.StartTask(sim.currentTime, truckFailedEvt);
         sim.evtQueue.push(truckFailedEvt);
         return;
     }
 
+    // Didn't fail so apply wear
     truck.ApplyWear();
     
-    auto arriveAtShovelEvt = Event{sim.currentTime + travelTime, truckId, bestShovelId, {}, EventType::TruckArriveShovel};
+    auto arriveAtShovelEvt = Event{sim.currentTime + navPath.travelTime, truckId, bestShovelId, {}, EventType::TruckArriveShovel};
     truck.StartTask(sim.currentTime, arriveAtShovelEvt);
 
     sim.evtQueue.push(arriveAtShovelEvt);
