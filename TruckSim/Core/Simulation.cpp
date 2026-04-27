@@ -111,10 +111,12 @@ void Simulation::HandleTruckFinishDumping (SimState& sim, const Event& evt)
 void Simulation::HandleTruckPartFail(SimState& sim, const Event& evt)
 {
     Truck& truck = sim.trucks[evt.truck.value];
+    
     const EntityPart& part = truck.GetBrokenPart();
     Event fixedEvt = {sim.currentTime + part.repairTime, evt.truck, {}, {}, EventType::TruckPartFixed};
     truck.StartTask(sim.currentTime, fixedEvt);
 
+    sim.isPaused = true;
     sim.evtQueue.push(fixedEvt);
 }
 
@@ -140,7 +142,6 @@ void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
     Truck& truck = sim.trucks[truckId.value];
     
     truck.SetState(TruckState::Travelling);
-    
     const DumpId bestDump = Dump::GetBestDump(sim, truck);
     const Position dumpPos = sim.dumps[bestDump.value].GetPosition();
     const float travelTimeToDump = Utilities::GetTravelTime(truck.GetPosition(), dumpPos, truck.GetSpeed());
@@ -149,7 +150,15 @@ void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
     int fail = truck.RollForFailure();
     if (fail != -1)
     {
-        float travelTimeBeforeFail = travelTimeToDump * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+        truck.SetState(TruckState::Broken);
+        float progressBeforeFail =static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        float travelTimeBeforeFail = travelTimeToDump * progressBeforeFail;
+
+        Position truckPos = truck.GetPosition();
+        Position progressPosition = truckPos + (dumpPos - truckPos) * progressBeforeFail;
+        truck.SetPosition(progressPosition);
+        truck.targetPosition = progressPosition;
+        
         auto truckFailedEvt = Event{sim.currentTime + travelTimeBeforeFail, truckId, {}, {}, EventType::TruckPartFail};
         truck.StartTask(sim.currentTime, truckFailedEvt);
         sim.evtQueue.push(truckFailedEvt);

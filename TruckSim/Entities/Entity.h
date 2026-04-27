@@ -17,7 +17,7 @@ public:
         return id;
     }
     
-    Position GetPosition() const
+    virtual Position GetPosition() const
     {
         return position;
     }

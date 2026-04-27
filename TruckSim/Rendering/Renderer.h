@@ -83,7 +83,7 @@ inline void Render(const SimState& sim, Event evt, Font font)
     
     for (const auto& t : sim.trucks)
     {
-        if (t.GetState() != TruckState::Travelling) continue;
+        if (t.GetState() != TruckState::Travelling && t.GetState() != TruckState::Broken) continue;
         
         Vector2 start = worldToScreen(t.GetPosition());
         Vector2 end = worldToScreen(t.targetPosition);
