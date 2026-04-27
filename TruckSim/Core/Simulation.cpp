@@ -44,6 +44,7 @@ void Simulation::HandleTruckFinishLoading(SimState& sim, const Event& evt)
     Shovel& shovel = sim.shovels[evt.shovel.value];
     Truck& truckLeavingShovel = sim.trucks[evt.truck.value];
 
+    sim.totalUnitsLoaded += static_cast<float>(truckLeavingShovel.RemainingCapacity());
     truckLeavingShovel.Fill();
                     
     shovel.DequeueTruck(); // Truck has finished loading, and is leaving, so remove from queue
@@ -93,6 +94,7 @@ void Simulation::HandleTruckFinishDumping (SimState& sim, const Event& evt)
     Dump& dump = sim.dumps[evt.dump.value];
     Truck& truckLeavingDump = sim.trucks[evt.truck.value];
 
+    sim.totalUnitsDumped += static_cast<float>(truckLeavingDump.CurrentLoad());
     truckLeavingDump.Empty();
                     
     dump.DequeueTruck();
@@ -174,8 +176,12 @@ void Simulation::DispatchTruckToDump(SimState& sim, TruckId truckId)
         auto truckFailedEvt = Event{sim.currentTime + travelTimeBeforeFail, truckId, {}, {}, EventType::TruckPartFail};
         truck.StartTask(sim.currentTime, truckFailedEvt);
         sim.evtQueue.push(truckFailedEvt);
+
+        sim.totalTimeSpentTravelling += travelTimeBeforeFail;
         return;
     }
+
+    sim.totalTimeSpentTravelling += navPath.travelTime;
 
     // Didnt fail, so apply wear to parts
     truck.ApplyWear();
@@ -214,9 +220,13 @@ void Simulation::DispatchTruckToShovel(SimState& sim, TruckId truckId)
         auto truckFailedEvt = Event{sim.currentTime + travelTimeBeforeFail, truckId, {}, {}, EventType::TruckPartFail};
         truck.StartTask(sim.currentTime, truckFailedEvt);
         sim.evtQueue.push(truckFailedEvt);
+
+        sim.totalTimeSpentTravelling += travelTimeBeforeFail;
         return;
     }
 
+    sim.totalTimeSpentTravelling += navPath.travelTime;
+    
     // Didn't fail so apply wear
     truck.ApplyWear();
     

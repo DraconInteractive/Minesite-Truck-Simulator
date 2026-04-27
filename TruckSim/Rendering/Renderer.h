@@ -131,6 +131,14 @@ inline void Render(const SimState& sim, Event evt, Font font)
           : "Waiting...";
     DrawText(evtLabel.c_str(), 10, 35, 20, WHITE);
 
+    std::string unitsLoadedLabel = "Units Loaded: " + std::to_string(static_cast<int>(sim.totalUnitsLoaded));
+    std::string unitsDumpedLabel = "Units Dumped: " + std::to_string(static_cast<int>(sim.totalUnitsDumped));
+    std::string timeTravelledLabel = "Time Spent Travelling: " + std::to_string(static_cast<int>(sim.totalTimeSpentTravelling));
+
+    DrawText(unitsLoadedLabel.c_str(), 10, 100, 15, WHITE);
+    DrawText(unitsDumpedLabel.c_str(), 10, 120, 15, WHITE);
+    DrawText(timeTravelledLabel.c_str(), 10, 140, 15, WHITE);
+    
     if (sim.isPaused)
     {
         // Key prompt

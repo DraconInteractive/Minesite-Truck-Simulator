@@ -20,7 +20,7 @@ public:
 
     float TimeToProcess(const Truck& truck) const override
     {
-        return truck.RemainingCapacity() / processSpeed;
+        return static_cast<float>(truck.RemainingCapacity()) / processSpeed;
     }
 
     bool IsDestination(const Event& evt) const override

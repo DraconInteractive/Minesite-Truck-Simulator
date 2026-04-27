@@ -29,4 +29,8 @@ struct SimState
     RoutingConfig routing;
     DebugConfig debug;
     bool isPaused;
+
+    float totalUnitsDumped = 0;
+    float totalUnitsLoaded = 0;
+    float totalTimeSpentTravelling = 0;
 };

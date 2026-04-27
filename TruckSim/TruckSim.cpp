@@ -40,7 +40,6 @@ static void DispatchEvent(SimState& sim, const Event& evt, bool logEvents)
 int main(int argc, char* argv[])
 {
     std::cout << "Initializing...\n";
-    std::cout << "Initializing...\n";
     
     Config cfg;
     
