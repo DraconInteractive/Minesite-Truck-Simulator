@@ -1,6 +1,6 @@
 # TruckSim
 
-<video src="TruckSim/docs/videos/TruckSim_Recording_270426_01.mp4" controls width="800"></video>
+<video src="https://github.com/DraconInteractive/Minesite-Truck-Simulator/blob/master/TruckSim/docs/videos/TruckSim_Recording_270426_01.mp4" controls width="800"></video>
 
 A discrete-event simulation of a mining haul truck fleet. Trucks cycle between shovel loading sites and dump sites, queuing when sites are busy. The simulation is driven entirely by an event queue — no fixed time steps.
 
